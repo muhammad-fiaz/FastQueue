@@ -3,15 +3,18 @@
  * @brief Platform thread / mutex / condition-variable implementation.
  */
 
-#if defined(FQ_OS_POSIX) && !defined(_GNU_SOURCE)
-#define _GNU_SOURCE
-#endif
-#if defined(FQ_OS_POSIX) && !defined(_POSIX_C_SOURCE)
-#define _POSIX_C_SOURCE 200809L
+#if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
+#    if !defined(_GNU_SOURCE)
+#        define _GNU_SOURCE
+#    endif
+#    if !defined(_POSIX_C_SOURCE)
+#        define _POSIX_C_SOURCE 200809L
+#    endif
 #endif
 
 #include "fastqueue/platform.h"
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
