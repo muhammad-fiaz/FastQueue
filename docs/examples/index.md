@@ -12,35 +12,35 @@ All FastQueue examples with complete, runnable code.
 
 | Example | Description |
 |---|---|
-| [Basic Jobs](/FastQueue/examples/basic-jobs) | Submit and execute simple tasks |
-| [Parallel For](/FastQueue/examples/parallel-for) | Parallel data processing |
+| [Basic Jobs](/examples/basic-jobs) | Submit and execute simple tasks |
+| [Parallel For](/examples/parallel-for) | Parallel data processing |
 
 ## Scheduler
 
 | Example | Description |
 |---|---|
-| [Scheduler Basics](/FastQueue/examples/basic-jobs) | Low-level scheduler usage |
-| [Work Stealing](/FastQueue/examples/basic-jobs) | Demonstrate work stealing |
+| [Scheduler Basics](/examples/basic-jobs) | Low-level scheduler usage |
+| [Work Stealing](/examples/basic-jobs) | Demonstrate work stealing |
 
 ## Futures
 
 | Example | Description |
 |---|---|
-| [Futures](/FastQueue/examples/futures) | Awaitable task results |
-| [Multiple Futures](/FastQueue/examples/futures) | Wait for multiple tasks |
+| [Futures](/examples/futures) | Awaitable task results |
+| [Multiple Futures](/examples/futures) | Wait for multiple tasks |
 
 ## Memory
 
 | Example | Description |
 |---|---|
-| [Custom Allocator](/FastQueue/examples/custom-allocator) | Pluggable allocator interface |
+| [Custom Allocator](/examples/custom-allocator) | Pluggable allocator interface |
 
 ## Patterns
 
 | Example | Description |
 |---|---|
-| [Graceful Shutdown](/FastQueue/examples/graceful-shutdown) | Clean shutdown patterns |
-| [Error Handling](/FastQueue/examples/error-handling) | Error handling best practices |
+| [Graceful Shutdown](/examples/graceful-shutdown) | Clean shutdown patterns |
+| [Error Handling](/examples/error-handling) | Error handling best practices |
 
 ## C++ Usage
 

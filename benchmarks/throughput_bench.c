@@ -21,12 +21,12 @@ static uint64_t now_ns(void)
 }
 #endif
 
-static volatile int g_sink = 0;
+static fq_atomic_int_t g_sink = FQ_ATOMIC_INIT(0);
 
 static void nop_bench(void *arg)
 {
     (void)arg;
-    g_sink++;
+    fq_atomic_fetch_add_explicit(&g_sink, 1, FQ_MEMORY_ORDER_RELAXED);
 }
 
 static void bench_throughput(const char *label, unsigned threads, int total)

@@ -84,6 +84,8 @@ set(FQ_SOURCES
     src/thread/thread_pool.c
     src/utils/errors.c
     src/utils/version.c
+    src/utils/parallel.c
+    src/utils/time.c
 )
 
 set(FQ_PUBLIC_HEADERS
@@ -100,6 +102,8 @@ set(FQ_PUBLIC_HEADERS
     include/fastqueue/future.h
     include/fastqueue/scheduler.h
     include/fastqueue/thread_pool.h
+    include/fastqueue/parallel.h
+    include/fastqueue/time.h
 )
 
 # ── Library target ──────────────────────────────────────────────────────

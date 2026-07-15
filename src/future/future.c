@@ -163,10 +163,11 @@ fq_status_t fq_future_on_complete(fq_future_t *future,
     future->callback      = callback;
     future->callback_data = user_data;
 
-    /* If already fulfilled, invoke immediately. */
+    /* If already fulfilled, invoke immediately under lock. */
     if (fq_atomic_load_explicit(&future->ready, FQ_MEMORY_ORDER_RELAXED)) {
+        fq_status_t st = future->status;
         fq_mutex_unlock(&future->mutex);
-        callback(user_data, future->status);
+        callback(user_data, st);
         return FQ_OK;
     }
     fq_mutex_unlock(&future->mutex);
@@ -200,10 +201,14 @@ void fq_future_set_result(fq_future_t *future, fq_status_t status)
     future->status = status;
     fq_atomic_store_explicit(&future->ready, 1, FQ_MEMORY_ORDER_RELEASE);
     fq_condition_broadcast(&future->cond);
+
+    /* Capture callback under lock to avoid use-after-free. */
+    fq_completion_fn cb = future->callback;
+    void *cb_data = future->callback_data;
     fq_mutex_unlock(&future->mutex);
 
     /* Invoke completion callback if registered. */
-    if (future->callback) {
-        future->callback(future->callback_data, status);
+    if (cb) {
+        cb(cb_data, status);
     }
 }

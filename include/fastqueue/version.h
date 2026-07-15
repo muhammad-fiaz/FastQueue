@@ -11,6 +11,12 @@
 #ifndef FQ_VERSION_H
 #define FQ_VERSION_H
 
+#include "platform.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @def FQ_VERSION_MAJOR
  * @brief Major version (breaking changes).
@@ -46,20 +52,24 @@
  * @brief Encoded version as a hex integer: 0xMMmmpp.
  */
 #define FQ_VERSION_HEX \
-    ((FQ_VERSION_MAJOR << 16) | (FQ_VERSION_MINOR << 8) | FQ_VERSION_PATCH)
+    (((unsigned)FQ_VERSION_MAJOR << 16) | ((unsigned)FQ_VERSION_MINOR << 8) | (unsigned)FQ_VERSION_PATCH)
 
 /**
  * @brief Retrieve the runtime version string.
  *
  * @return Pointer to a static string (e.g. "0.1.0").
  */
-const char *fq_version_string(void);
+FQ_API const char *fq_version_string(void);
 
 /**
  * @brief Retrieve the runtime version as a hex integer.
  *
  * @return Encoded version: 0xMMmmpp.
  */
-int fq_version_hex(void);
+FQ_API int fq_version_hex(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* FQ_VERSION_H */

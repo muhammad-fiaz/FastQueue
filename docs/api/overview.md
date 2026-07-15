@@ -41,7 +41,7 @@ All functions return `fq_status_t`:
 ```c
 fq_status_t st = fq_thread_pool_create_ex(&pool, 4);
 if (st != FQ_OK) {
-    fprintf(stderr, "Error: %s\n", fq_error_string(st));
+    fprintf(stderr, "Error: %s\n", fq_status_string(st));
     return 1;
 }
 ```

@@ -32,6 +32,12 @@ static void counting_free(void *ptr, void *ctx)
     free(ptr);
 }
 
+static void *counting_realloc(void *ptr, size_t new_size, void *ctx)
+{
+    (void)ctx;
+    return realloc(ptr, new_size);
+}
+
 static void task_fn(void *arg)
 {
     printf("Task %d executed\n", *(int *)arg);
@@ -41,8 +47,9 @@ int main(void)
 {
     fq_allocator_t alloc = {
         .alloc   = counting_alloc,
+        .realloc = counting_realloc,
         .free    = counting_free,
-        .context = NULL
+        .ctx     = NULL
     };
 
     fq_thread_pool_t *pool = NULL;
@@ -102,8 +109,9 @@ int main(void)
 
     fq_allocator_t alloc = {
         .alloc   = arena_alloc,
+        .realloc = NULL,
         .free    = arena_free,
-        .context = &arena
+        .ctx     = &arena
     };
 
     fq_thread_pool_t *pool = NULL;
@@ -147,9 +155,13 @@ static void tracking_free(void *ptr, void *) {
     std::free(ptr);
 }
 
+static void *tracking_realloc(void *ptr, size_t new_size, void *) {
+    return std::realloc(ptr, new_size);
+}
+
 int main()
 {
-    fq_allocator_t alloc = { tracking_alloc, tracking_free, nullptr, nullptr, nullptr };
+    fq_allocator_t alloc = { tracking_alloc, tracking_realloc, tracking_free, nullptr };
 
     fq_thread_pool_t *pool = nullptr;
     fq_scheduler_config_t cfg;

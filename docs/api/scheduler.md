@@ -25,10 +25,14 @@ typedef struct fq_scheduler_config_t {
 } fq_scheduler_config_t;
 
 typedef struct fq_scheduler_stats_t {
-    uint64_t tasks_submitted;
-    uint64_t tasks_completed;
-    uint64_t tasks_canceled;
     unsigned thread_count;
+    size_t   tasks_submitted;
+    size_t   tasks_completed;
+    size_t   tasks_canceled;
+    size_t   tasks_pending;
+    size_t   tasks_active;
+    uint64_t total_wait_ns;
+    uint64_t total_work_ns;
 } fq_scheduler_stats_t;
 ```
 
@@ -69,6 +73,7 @@ fq_bool_t fq_scheduler_is_idle(const fq_scheduler_t *scheduler);
 fq_bool_t fq_scheduler_is_shutdown(const fq_scheduler_t *scheduler);
 void fq_scheduler_cancel_all(fq_scheduler_t *scheduler);
 ```
+`fq_scheduler_cancel_all` forcibly cancels all pending tasks and shuts down the scheduler.
 
 ### Statistics
 

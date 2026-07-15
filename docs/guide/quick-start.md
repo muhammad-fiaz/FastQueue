@@ -161,6 +161,12 @@ static void my_free(void *ptr, void *ctx)
     free(ptr);
 }
 
+static void *my_realloc(void *ptr, size_t new_size, void *ctx)
+{
+    (void)ctx;
+    return realloc(ptr, new_size);
+}
+
 static void task_fn(void *arg)
 {
     printf("Task with custom allocator: %d\n", *(int *)arg);
@@ -168,7 +174,7 @@ static void task_fn(void *arg)
 
 int main(void)
 {
-    fq_allocator_t alloc = { my_alloc, my_free, NULL };
+    fq_allocator_t alloc = { my_alloc, my_realloc, my_free, NULL };
 
     fq_thread_pool_t *pool = NULL;
     fq_thread_pool_create_ex(&pool, 4);
@@ -187,7 +193,7 @@ int main(void)
 
 ## Next Steps
 
-- [Thread Pool](/FastQueue/guide/thread-pool) - Deep dive into thread pool configuration
-- [Scheduler](/FastQueue/guide/scheduler) - Priority scheduling and work stealing
-- [Futures](/FastQueue/guide/futures) - Awaitable results
-- [API Reference](/FastQueue/api/overview) - Complete API documentation
+- [Thread Pool](/guide/thread-pool) - Deep dive into thread pool configuration
+- [Scheduler](/guide/scheduler) - Priority scheduling and work stealing
+- [Futures](/guide/futures) - Awaitable results
+- [API Reference](/api/overview) - Complete API documentation

@@ -23,7 +23,7 @@ extern "C" {
  * @param status Status code to describe.
  * @return Pointer to a static string such as "out of memory".
  */
-const char *fq_status_string(fq_status_t status);
+FQ_API const char *fq_status_string(fq_status_t status);
 
 /**
  * @brief Check whether a status code indicates success.
@@ -31,7 +31,7 @@ const char *fq_status_string(fq_status_t status);
  * @param status Status code.
  * @return ::FQ_TRUE if @p status is ::FQ_OK, ::FQ_FALSE otherwise.
  */
-fq_bool_t fq_status_ok(fq_status_t status);
+FQ_API fq_bool_t fq_status_ok(fq_status_t status);
 
 /**
  * @brief Thread-local storage for the last error message.
@@ -40,7 +40,7 @@ fq_bool_t fq_status_ok(fq_status_t status);
  *
  * @return Null-terminated error string, or an empty string if no error.
  */
-const char *fq_last_error(void);
+FQ_API const char *fq_last_error(void);
 
 /**
  * @brief Set the thread-local error message.
@@ -48,7 +48,7 @@ const char *fq_last_error(void);
  * @param fmt printf-style format string.
  * @param ... Format arguments.
  */
-void fq_set_error(const char *fmt, ...) FQ_PRINTF_FMT(1, 2);
+FQ_API void fq_set_error(const char *fmt, ...) FQ_PRINTF_FMT(1, 2);
 
 #ifdef __cplusplus
 }

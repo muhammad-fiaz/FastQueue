@@ -24,16 +24,12 @@ FQ_QUEUE_MAX_CAPACITY
 
 // Thread limits
 FQ_MAX_THREADS
-```
 
-## Memory Order
+// Future spin count before falling back to condition variable
+FQ_FUTURE_SPIN_COUNT
 
-```c
-FQ_MEMORY_ORDER_RELAXED
-FQ_MEMORY_ORDER_ACQUIRE
-FQ_MEMORY_ORDER_RELEASE
-FQ_MEMORY_ORDER_ACQ_REL
-FQ_MEMORY_ORDER_SEQ_CST
+// Cache-line size in bytes for padding
+FQ_CACHE_LINE_SIZE
 ```
 
 ## Log Levels
@@ -44,15 +40,14 @@ typedef enum fq_log_level_t {
     FQ_LOG_ERROR  = 1,
     FQ_LOG_WARN   = 2,
     FQ_LOG_INFO   = 3,
-    FQ_LOG_DEBUG  = 4,
-    FQ_LOG_TRACE  = 5
+    FQ_LOG_DEBUG  = 4
 } fq_log_level_t;
 ```
 
 ## Log Callback
 
 ```c
-typedef void (*fq_log_fn)(fq_log_level_t level, const char *message, void *context);
+typedef void (*fq_log_fn)(fq_log_level_t level, const char *message, void *ctx);
 ```
 
 ## Example

@@ -145,13 +145,13 @@ fq_thread_pool_t *pool = NULL;
 fq_status_t st = fq_thread_pool_create_ex(&pool, 4);
 
 if (st != FQ_OK) {
-    fprintf(stderr, "Failed to create pool: %s\n", fq_error_string(st));
+    fprintf(stderr, "Failed to create pool: %s\n", fq_status_string(st));
     return 1;
 }
 
 st = fq_thread_pool_submit_fn(pool, my_task, NULL);
 if (st != FQ_OK) {
-    fprintf(stderr, "Submit failed: %s\n", fq_error_string(st));
+    fprintf(stderr, "Submit failed: %s\n", fq_status_string(st));
 }
 
 fq_thread_pool_shutdown(pool);

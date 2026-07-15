@@ -29,8 +29,6 @@
 > If you build with FastQueue, make sure to give it a star.
 
 > [!NOTE]
-> **Project maturity:** This project aims to be production-ready and is actively maintained. It is still a new project and not yet widely adopted. Feel free to use it in your projects.
->
 > **Cross-platform:** FastQueue supports Linux (GCC, Clang), Windows (MSVC 2022+), and macOS (Clang) with zero external dependencies.
 
 ---
@@ -44,6 +42,8 @@
 | **Job Scheduler** | Low-level scheduler with priority support, work stealing, and statistics tracking. | https://muhammad-fiaz.github.io/FastQueue/api/scheduler |
 | **MPMC Queue** | Thread-safe multi-producer multi-consumer queue with mutex-protected push/pop operations. | https://muhammad-fiaz.github.io/FastQueue/api/queue |
 | **Futures** | Awaitable results with spin-then-wait strategy for low-latency task completion. | https://muhammad-fiaz.github.io/FastQueue/api/future |
+| **Parallel For** | Built-in parallel for-loop that distributes work across worker threads. | https://muhammad-fiaz.github.io/FastQueue/api/parallel |
+| **Time Utilities** | High-resolution timer and monotonic clock for performance measurement. | https://muhammad-fiaz.github.io/FastQueue/api/time |
 | **Custom Allocators** | Pluggable allocator interface for memory-constrained and embedded environments. | https://muhammad-fiaz.github.io/FastQueue/guide/memory |
 | **Cross-Platform** | Runs on Linux, Windows (MSVC), and macOS with no external dependencies. | https://muhammad-fiaz.github.io/FastQueue/guide/installation |
 | **C23 Modern C** | Written in ISO C23 with forward compatibility for C2Y/C26. | https://muhammad-fiaz.github.io/FastQueue/ |
@@ -271,8 +271,9 @@ cmake --build build --config Release
 ./build/benchmarks/Release/fq_benchmark
 ```
 
-> [!NOTE]
-> Benchmark results will vary based on hardware.
+### Benchmark Environment
+
+### Results
 
 | Configuration | Jobs | Throughput |
 |---|---|---|

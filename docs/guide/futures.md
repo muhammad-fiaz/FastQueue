@@ -67,7 +67,6 @@ fq_bool_t fq_future_is_ready(const fq_future_t *future);
 
 ```c
 fq_status_t fq_future_status(const fq_future_t *future);
-fq_status_t fq_future_error(const fq_future_t *future);
 ```
 
 ## Multiple Futures

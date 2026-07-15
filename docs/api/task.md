@@ -13,6 +13,7 @@ Task creation and management.
 ```c
 typedef struct fq_task_t fq_task_t;
 typedef void (*fq_task_fn)(void *user_data);
+typedef void (*fq_completion_fn)(void *user_data, fq_status_t status);
 ```
 
 ## Enums
@@ -21,7 +22,8 @@ typedef void (*fq_task_fn)(void *user_data);
 typedef enum fq_priority_t {
     FQ_PRIORITY_LOW    = 0,
     FQ_PRIORITY_NORMAL = 1,
-    FQ_PRIORITY_HIGH   = 2
+    FQ_PRIORITY_HIGH   = 2,
+    FQ_PRIORITY_URGENT = 3
 } fq_priority_t;
 ```
 
@@ -39,12 +41,19 @@ fq_status_t fq_task_create(
 void fq_task_destroy(fq_task_t *task);
 ```
 
-### Execution
+### Creation with Completion
 
 ```c
-void fq_task_execute(fq_task_t *task);
+fq_status_t fq_task_create_with_completion(
+    fq_task_t **task,
+    fq_task_fn callback,
+    void *user_data,
+    fq_completion_fn completion,
+    void *completion_data,
+    const fq_allocator_t *allocator
+);
 ```
-Execute the task's function. Called by the scheduler.
+Create a task with an attached completion callback. The completion is invoked with the task's status when execution finishes.
 
 ### Properties
 
@@ -61,10 +70,4 @@ fq_bool_t fq_task_is_canceled(const fq_task_t *task);
 ```c
 void fq_task_set_future(fq_task_t *task, fq_future_t *future);
 fq_future_t *fq_task_future(const fq_task_t *task);
-```
-
-### Cancellation
-
-```c
-void fq_task_cancel(fq_task_t *task);
 ```

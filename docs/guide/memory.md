@@ -37,12 +37,6 @@ static void my_free(void *ptr, void *ctx)
     free(ptr);
 }
 
-static void *my_calloc(size_t count, size_t size, void *ctx)
-{
-    (void)ctx;
-    return calloc(count, size);
-}
-
 static void *my_realloc(void *ptr, size_t new_size, void *ctx)
 {
     (void)ctx;
@@ -53,10 +47,9 @@ int main(void)
 {
     fq_allocator_t alloc = {
         .alloc   = my_alloc,
-        .free    = my_free,
-        .calloc  = my_calloc,
         .realloc = my_realloc,
-        .context = NULL
+        .free    = my_free,
+        .ctx     = NULL
     };
 
     fq_scheduler_config_t cfg;
@@ -113,7 +106,7 @@ int main(void)
     fq_allocator_t alloc = {
         .alloc   = arena_alloc,
         .free    = arena_free,
-        .context = &arena
+        .ctx     = &arena
     };
 
     fq_thread_pool_t *pool = NULL;
@@ -142,11 +135,10 @@ int main(void)
 
 ```c
 typedef struct fq_allocator_t {
-    void *(*alloc)(size_t size, void *context);
-    void  (*free)(void *ptr, void *context);
-    void *(*calloc)(size_t count, size_t size, void *context);
-    void *(*realloc)(void *ptr, size_t new_size, void *context);
-    void *context;
+    void *(*alloc)(size_t size, void *ctx);
+    void *(*realloc)(void *ptr, size_t size, void *ctx);
+    void  (*free)(void *ptr, void *ctx);
+    void  *ctx;
 } fq_allocator_t;
 
 const fq_allocator_t *fq_default_allocator(void);

@@ -78,6 +78,6 @@ vcpkg install fastqueue
 
 ## Next Steps
 
-- [Quick Start](/FastQueue/guide/quick-start) - Write your first program
-- [Thread Pool](/FastQueue/guide/thread-pool) - Learn about the thread pool
-- [API Reference](/FastQueue/api/overview) - Full API docs
+- [Quick Start](/guide/quick-start) - Write your first program
+- [Thread Pool](/guide/thread-pool) - Learn about the thread pool
+- [API Reference](/api/overview) - Full API docs

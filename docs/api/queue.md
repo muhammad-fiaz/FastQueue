@@ -44,10 +44,4 @@ size_t fq_queue_capacity(const fq_queue_t *queue);
 ```c
 size_t fq_queue_drain(fq_queue_t *queue, fq_task_t **out, size_t max);
 ```
-
-### Lifecycle
-
-```c
-void fq_queue_close(fq_queue_t *queue);
-fq_bool_t fq_queue_is_closed(const fq_queue_t *queue);
-```
+Drain up to `max` tasks from the queue into `out`. Returns the number of tasks actually drained.

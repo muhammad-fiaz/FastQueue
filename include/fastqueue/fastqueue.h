@@ -29,6 +29,8 @@ extern "C" {
 #include "fastqueue/future.h"
 #include "fastqueue/scheduler.h"
 #include "fastqueue/thread_pool.h"
+#include "fastqueue/parallel.h"
+#include "fastqueue/time.h"
 
 #ifdef __cplusplus
 }

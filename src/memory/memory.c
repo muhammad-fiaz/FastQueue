@@ -9,12 +9,16 @@
 #include <stdlib.h>
 #include <string.h>
 
- 
 
 static fq_atomic_int_t g_alloc_count  = FQ_ATOMIC_INIT(0);
 static fq_atomic_int_t g_free_count   = FQ_ATOMIC_INIT(0);
 static fq_atomic_int_t g_allocated_32 = FQ_ATOMIC_INIT(0);
 static fq_atomic_int_t g_peak_32      = FQ_ATOMIC_INIT(0);
+
+/* Size header prepended to each allocation for accurate free tracking. */
+typedef struct {
+    size_t size;
+} fq_alloc_header_t;
 
 static void stats_alloc(size_t size)
 {
@@ -43,30 +47,42 @@ static void stats_free(size_t size)
     fq_atomic_fetch_add_explicit(&g_free_count, 1, FQ_MEMORY_ORDER_RELAXED);
 }
 
- 
 
 static void *default_alloc(size_t size, void *ctx)
 {
     (void)ctx;
-    void *p = malloc(size);
-    if (p) stats_alloc(size);
-    return p;
+    fq_alloc_header_t *h = (fq_alloc_header_t *)malloc(sizeof(*h) + size);
+    if (!h) return NULL;
+    h->size = size;
+    stats_alloc(size);
+    return (void *)(h + 1);
 }
 
 static void *default_realloc(void *ptr, size_t size, void *ctx)
 {
     (void)ctx;
-    void *p = realloc(ptr, size);
-    if (p && !ptr) stats_alloc(size);
-    return p;
+    if (!ptr) return default_alloc(size, ctx);
+
+    fq_alloc_header_t *h = (fq_alloc_header_t *)ptr - 1;
+    size_t old_size = h->size;
+
+    fq_alloc_header_t *new_h = (fq_alloc_header_t *)realloc(h, sizeof(*h) + size);
+    if (!new_h) return NULL;
+
+    new_h->size = size;
+    /* Update stats: subtract old, add new. */
+    stats_free(old_size);
+    stats_alloc(size);
+    return (void *)(new_h + 1);
 }
 
 static void default_free(void *ptr, void *ctx)
 {
     (void)ctx;
     if (ptr) {
-        stats_free(0);
-        free(ptr);
+        fq_alloc_header_t *h = (fq_alloc_header_t *)ptr - 1;
+        stats_free(h->size);
+        free(h);
     }
 }
 
@@ -82,7 +98,6 @@ const fq_allocator_t *fq_default_allocator(void)
     return &g_default_allocator;
 }
 
- 
 
 void *fq_alloc(const fq_allocator_t *alloc, size_t size)
 {
@@ -93,6 +108,7 @@ void *fq_alloc(const fq_allocator_t *alloc, size_t size)
 void *fq_calloc(const fq_allocator_t *alloc, size_t count, size_t size)
 {
     if (!alloc) alloc = &g_default_allocator;
+    if (count != 0 && size > SIZE_MAX / count) return NULL;
     size_t total = count * size;
     void *p = alloc->alloc(total, alloc->ctx);
     if (p) memset(p, 0, total);
@@ -111,7 +127,6 @@ void fq_free(const fq_allocator_t *alloc, void *ptr)
     alloc->free(ptr, alloc->ctx);
 }
 
- 
 
 size_t fq_align_up(size_t size, size_t alignment)
 {
@@ -126,7 +141,6 @@ fq_bool_t fq_is_aligned(const void *ptr, size_t alignment)
     return ((uintptr_t)ptr & (alignment - 1)) == 0;
 }
 
- 
 
 void fq_mem_stats(fq_mem_stats_t *stats)
 {

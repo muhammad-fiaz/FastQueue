@@ -30,7 +30,7 @@ int main(void)
     st = fq_thread_pool_create_ex(&pool, 4);
     if (st != FQ_OK) {
         fprintf(stderr, "Pool creation failed: %s (code=%d)\n",
-                fq_error_string(st), st);
+                fq_status_string(st), st);
         return 1;
     }
 
@@ -46,7 +46,7 @@ int main(void)
         st = fq_thread_pool_submit_fn(pool, safe_task, id);
         if (st != FQ_OK) {
             fprintf(stderr, "Submit task %d failed: %s\n",
-                    i, fq_error_string(st));
+                    i, fq_status_string(st));
             free(id);
         }
     }
@@ -57,7 +57,7 @@ int main(void)
     // 4. Shutdown
     st = fq_thread_pool_shutdown(pool);
     if (st != FQ_OK) {
-        fprintf(stderr, "Shutdown failed: %s\n", fq_error_string(st));
+        fprintf(stderr, "Shutdown failed: %s\n", fq_status_string(st));
         return 1;
     }
 
@@ -90,7 +90,7 @@ int main(void)
 
     fq_status_t st = fq_scheduler_create(&scheduler, &cfg);
     if (st != FQ_OK) {
-        fprintf(stderr, "Scheduler create: %s\n", fq_error_string(st));
+        fprintf(stderr, "Scheduler create: %s\n", fq_status_string(st));
         return 1;
     }
 
@@ -98,7 +98,7 @@ int main(void)
     for (int i = 0; i < 5; ++i) {
         st = fq_scheduler_submit_fn(scheduler, validated_task, &values[i]);
         if (st != FQ_OK) {
-            fprintf(stderr, "Submit %d: %s\n", i, fq_error_string(st));
+            fprintf(stderr, "Submit %d: %s\n", i, fq_status_string(st));
         }
     }
 
@@ -127,7 +127,7 @@ int main()
     fq_status_t st = fq_thread_pool_create_ex(&pool, 4);
 
     if (st != FQ_OK) {
-        std::cerr << "Failed: " << fq_error_string(st) << "\n";
+        std::cerr << "Failed: " << fq_status_string(st) << "\n";
         return 1;
     }
 
@@ -138,7 +138,7 @@ int main()
         }, id.get());
 
         if (st != FQ_OK) {
-            std::cerr << "Submit failed: " << fq_error_string(st) << "\n";
+            std::cerr << "Submit failed: " << fq_status_string(st) << "\n";
         } else {
             id.release(); // Transfer ownership to pool
         }

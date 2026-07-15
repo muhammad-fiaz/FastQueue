@@ -86,7 +86,7 @@ Shutdown the pool and free resources.
 ### Statistics
 
 ```c
-void fq_thread_pool_stats(const fq_thread_pool_t *pool, fq_thread_pool_stats_t *stats);
+void fq_thread_pool_stats(const fq_thread_pool_t *pool, fq_scheduler_stats_t *stats);
 ```
 Get pool statistics.
 

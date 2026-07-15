@@ -60,7 +60,7 @@ All functions return `fq_status_t`:
 ```c
 fq_status_t st = fq_thread_pool_submit_fn(pool, my_task, NULL);
 if (st != FQ_OK) {
-    fprintf(stderr, "Error: %s\n", fq_error_string(st));
+    fprintf(stderr, "Error: %s\n", fq_status_string(st));
 }
 ```
 

@@ -39,24 +39,24 @@ typedef _Atomic unsigned long fq_atomic_ulong_t;
 
 static inline int fq_atomic_load_explicit(volatile fq_atomic_int_t *a, int order)
 {
+    /* Clamp: loads only allow relaxed, acquire, seq_cst. */
     int mo;
     switch (order) {
     case 1: mo = memory_order_acquire; break;
-    case 2: mo = memory_order_release; break;
-    case 3: mo = memory_order_acq_rel; break;
-    default: mo = (order <= 0) ? memory_order_relaxed : memory_order_seq_cst; break;
+    case 0: mo = memory_order_relaxed; break;
+    default: mo = memory_order_seq_cst; break;
     }
     return atomic_load_explicit((_Atomic int *)(void *)a, (memory_order)mo);
 }
 
 static inline void fq_atomic_store_explicit(volatile fq_atomic_int_t *a, int val, int order)
 {
+    /* Clamp: stores only allow relaxed, release, seq_cst. */
     int mo;
     switch (order) {
-    case 1: mo = memory_order_acquire; break;
     case 2: mo = memory_order_release; break;
-    case 3: mo = memory_order_acq_rel; break;
-    default: mo = (order <= 0) ? memory_order_relaxed : memory_order_seq_cst; break;
+    case 0: mo = memory_order_relaxed; break;
+    default: mo = memory_order_seq_cst; break;
     }
     atomic_store_explicit((_Atomic int *)(void *)a, val, (memory_order)mo);
 }
@@ -245,61 +245,107 @@ static inline int fq_atomic_fetch_and_explicit(fq_atomic_int_t *a, int operand, 
 
 static inline int fq_atomic_load_explicit(volatile fq_atomic_int_t *a, int order)
 {
-    int val = *a;
-    if (order >= 1) __atomic_thread_fence(__ATOMIC_ACQUIRE);
-    return val;
+    int mo;
+    switch (order) {
+    case 0: mo = __ATOMIC_RELAXED; break;
+    case 1: mo = __ATOMIC_ACQUIRE; break;
+    default: mo = __ATOMIC_SEQ_CST; break;
+    }
+    return __atomic_load_n(a, mo);
 }
 
 static inline void fq_atomic_store_explicit(volatile fq_atomic_int_t *a, int val, int order)
 {
-    if (order >= 2) __atomic_thread_fence(__ATOMIC_RELEASE);
-    *a = val;
+    int mo;
+    switch (order) {
+    case 0: mo = __ATOMIC_RELAXED; break;
+    case 2: mo = __ATOMIC_RELEASE; break;
+    default: mo = __ATOMIC_SEQ_CST; break;
+    }
+    __atomic_store_n(a, val, mo);
 }
 
 static inline int fq_atomic_exchange_explicit(volatile fq_atomic_int_t *a, int val, int order)
 {
-    (void)order;
-    return __sync_lock_test_and_set(a, val);
+    int mo;
+    switch (order) {
+    case 0: mo = __ATOMIC_RELAXED; break;
+    case 1: mo = __ATOMIC_ACQUIRE; break;
+    case 2: mo = __ATOMIC_RELEASE; break;
+    case 3: mo = __ATOMIC_ACQ_REL; break;
+    default: mo = __ATOMIC_SEQ_CST; break;
+    }
+    return __atomic_exchange_n(a, val, mo);
 }
 
 static inline fq_bool_t fq_atomic_compare_exchange_strong_explicit(
     volatile fq_atomic_int_t *a, int *expected, int desired,
     int success_order, int failure_order)
 {
-    (void)success_order;
     (void)failure_order;
-    return __sync_bool_compare_and_swap(a, *expected, desired) ? 1 : (*expected = *a, 0);
+    int mo;
+    switch (success_order) {
+    case 0: mo = __ATOMIC_RELAXED; break;
+    case 1: mo = __ATOMIC_ACQUIRE; break;
+    case 2: mo = __ATOMIC_RELEASE; break;
+    case 3: mo = __ATOMIC_ACQ_REL; break;
+    default: mo = __ATOMIC_SEQ_CST; break;
+    }
+    return __atomic_compare_exchange_n(a, expected, desired, 0, mo, __ATOMIC_RELAXED) ? 1 : 0;
 }
 
 static inline fq_bool_t fq_atomic_compare_exchange_weak_explicit(
     volatile fq_atomic_int_t *a, int *expected, int desired,
     int success_order, int failure_order)
 {
-    return fq_atomic_compare_exchange_strong_explicit(a, expected, desired, success_order, failure_order);
+    (void)failure_order;
+    int mo;
+    switch (success_order) {
+    case 0: mo = __ATOMIC_RELAXED; break;
+    case 1: mo = __ATOMIC_ACQUIRE; break;
+    case 2: mo = __ATOMIC_RELEASE; break;
+    case 3: mo = __ATOMIC_ACQ_REL; break;
+    default: mo = __ATOMIC_SEQ_CST; break;
+    }
+    return __atomic_compare_exchange_n(a, expected, desired, 1, mo, __ATOMIC_RELAXED) ? 1 : 0;
 }
 
 static inline int fq_atomic_fetch_add_explicit(volatile fq_atomic_int_t *a, int operand, int order)
 {
-    (void)order;
-    return __sync_fetch_and_add(a, operand);
+    int mo;
+    switch (order) {
+    case 0: mo = __ATOMIC_RELAXED; break;
+    case 1: mo = __ATOMIC_ACQUIRE; break;
+    case 2: mo = __ATOMIC_RELEASE; break;
+    case 3: mo = __ATOMIC_ACQ_REL; break;
+    default: mo = __ATOMIC_SEQ_CST; break;
+    }
+    return __atomic_fetch_add(a, operand, mo);
 }
 
 static inline int fq_atomic_fetch_sub_explicit(volatile fq_atomic_int_t *a, int operand, int order)
 {
-    (void)order;
-    return __sync_fetch_and_sub(a, operand);
+    int mo;
+    switch (order) {
+    case 0: mo = __ATOMIC_RELAXED; break;
+    case 1: mo = __ATOMIC_ACQUIRE; break;
+    case 2: mo = __ATOMIC_RELEASE; break;
+    case 3: mo = __ATOMIC_ACQ_REL; break;
+    default: mo = __ATOMIC_SEQ_CST; break;
+    }
+    return __atomic_fetch_sub(a, operand, mo);
 }
 
 static inline int fq_atomic_fetch_or_explicit(volatile fq_atomic_int_t *a, int operand, int order)
 {
     (void)order;
-    return __sync_fetch_and_or(a, operand);
+    return __atomic_fetch_or(a, operand, __ATOMIC_SEQ_CST);
 }
 
 static inline int fq_atomic_fetch_and_explicit(volatile fq_atomic_int_t *a, int operand, int order)
 {
     (void)order;
-    return __sync_fetch_and_and(a, operand);
+    return __atomic_fetch_and(a, operand, __ATOMIC_SEQ_CST);
 }
 
 #endif

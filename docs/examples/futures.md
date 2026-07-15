@@ -38,7 +38,7 @@ int main(void)
 
     fq_status_t st = fq_scheduler_create(&scheduler, &cfg);
     if (st != FQ_OK) {
-        fprintf(stderr, "Failed: %s\n", fq_error_string(st));
+        fprintf(stderr, "Failed: %s\n", fq_status_string(st));
         return 1;
     }
 

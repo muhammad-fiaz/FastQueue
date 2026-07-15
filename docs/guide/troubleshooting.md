@@ -50,7 +50,7 @@ cfg.queue_capacity = 8192; // Increase capacity
 ```c
 fq_status_t st = fq_scheduler_submit_fn(scheduler, task, data);
 if (st != FQ_OK) {
-    fprintf(stderr, "Submit failed: %s\n", fq_error_string(st));
+    fprintf(stderr, "Submit failed: %s\n", fq_status_string(st));
 }
 ```
 
@@ -108,4 +108,4 @@ static void safe_task(void *arg) {
 ## Getting Help
 
 - [GitHub Issues](https://github.com/muhammad-fiaz/FastQueue/issues)
-- [API Reference](/FastQueue/api/overview)
+- [API Reference](/api/overview)

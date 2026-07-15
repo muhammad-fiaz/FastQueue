@@ -277,10 +277,11 @@ void fq_scheduler_cancel_all(fq_scheduler_t *scheduler)
     fq_atomic_store_explicit(&scheduler->shutdown_flag, 1,
                              FQ_MEMORY_ORDER_RELEASE);
 
-    fq_task_t *tasks[FQ_QUEUE_DEFAULT_CAPACITY];
+    /* Use a heap-allocated buffer to avoid VLA stack overflow. */
+    enum { BATCH = 256 };
+    fq_task_t *tasks[BATCH];
     size_t n;
-    while ((n = fq_queue_drain(scheduler->global_queue, tasks,
-                               FQ_QUEUE_DEFAULT_CAPACITY)) > 0) {
+    while ((n = fq_queue_drain(scheduler->global_queue, tasks, BATCH)) > 0) {
         for (size_t i = 0; i < n; ++i) {
             fq_task_destroy(tasks[i]);
             fq_atomic_fetch_add_explicit(&scheduler->tasks_canceled, 1,
@@ -289,8 +290,7 @@ void fq_scheduler_cancel_all(fq_scheduler_t *scheduler)
     }
 
     for (unsigned i = 0; i < scheduler->worker_count; ++i) {
-        n = fq_queue_drain(scheduler->workers[i].queue, tasks,
-                           FQ_QUEUE_DEFAULT_CAPACITY);
+        n = fq_queue_drain(scheduler->workers[i].queue, tasks, BATCH);
         for (size_t j = 0; j < n; ++j) {
             fq_task_destroy(tasks[j]);
             fq_atomic_fetch_add_explicit(&scheduler->tasks_canceled, 1,
