@@ -1,23 +1,29 @@
+<div align="center">
+
 # FastQueue
 
 **Production-ready, high-performance Job System & Thread Pool Library in ISO C23.**
+
+A lightweight, zero-dependency C23 library providing work-stealing thread pools, MPMC task queues, futures, and custom allocator support for building high-performance concurrent applications.
 
 [![CI](https://github.com/muhammad-fiaz/FastQueue/actions/workflows/ci.yml/badge.svg)](https://github.com/muhammad-fiaz/FastQueue/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![C Standard](https://img.shields.io/badge/C-C23-blue.svg)](https://en.wikipedia.org/wiki/C23)
 [![Documentation](https://img.shields.io/badge/Docs-VitePress-brightgreen.svg)](https://muhammad-fiaz.github.io/FastQueue/)
 
+</div>
+
 ## Features
 
-- **Thread Pool** — Built-in work-stealing thread pool with configurable worker count
-- **Job Scheduler** — Priority scheduling with work stealing and statistics
-- **Thread-Safe Queue** — MPMC-safe queue with mutex-protected push/pop
-- **Futures** — Awaitable results with spin-then-wait strategy
-- **Custom Allocators** — Pluggable allocator interface for constrained environments
-- **Cross-Platform** — Linux, Windows (MSVC), macOS
-- **C23 Modern C** — Forward-compatible with C2Y/C26
-- **Zero Dependencies** — Standard library only
-- **C++ Compatible** — All headers have `extern "C"` guards
+- **Thread Pool** - Built-in work-stealing thread pool with configurable worker count
+- **Job Scheduler** - Priority scheduling with work stealing and statistics
+- **Thread-Safe Queue** - MPMC-safe queue with mutex-protected push/pop
+- **Futures** - Awaitable results with spin-then-wait strategy
+- **Custom Allocators** - Pluggable allocator interface for constrained environments
+- **Cross-Platform** - Linux, Windows (MSVC), macOS
+- **C23 Modern C** - Forward-compatible with C2Y/C26
+- **Zero Dependencies** - Standard library only
+- **C++ Compatible** - All headers have `extern "C"` guards
 
 ## Quick Start
 
