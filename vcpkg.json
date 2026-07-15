@@ -1,0 +1,18 @@
+{
+  "name": "fastqueue",
+  "version": "0.1.0",
+  "description": "Production-ready, high-performance C23 job system and thread pool library",
+  "homepage": "https://github.com/muhammad-fiaz/FastQueue",
+  "license": "MIT",
+  "supports": "!(uwp | (arm & windows))",
+  "dependencies": [
+    {
+      "name": "vcpkg-cmake",
+      "version>=": "2023.04.15"
+    },
+    {
+      "name": "vcpkg-cmake-config",
+      "version>=": "2022.02.03"
+    }
+  ]
+}

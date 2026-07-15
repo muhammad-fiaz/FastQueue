@@ -1,0 +1,28 @@
+name: Help Wanted
+description: Get help with using FastQueue
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Ask a question about using FastQueue.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: What would you like to know?
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What are you trying to achieve? Include code snippets if relevant.
+
+  - type: input
+    id: version
+    attributes:
+      label: FastQueue Version
+      placeholder: e.g. 0.1.0
