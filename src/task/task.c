@@ -66,8 +66,8 @@ void fq_task_destroy(fq_task_t *task)
 {
     if (!task) return;
 
-    /* If this task has a pending future, cancel it. */
-    if (task->future) {
+    /* If this task has a pending future that was never fulfilled, cancel it. */
+    if (task->future && !fq_future_is_ready(task->future)) {
         fq_future_cancel(task->future);
     }
 

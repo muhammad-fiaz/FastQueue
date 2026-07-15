@@ -107,6 +107,8 @@ static int worker_main(void *arg)
 
             fq_task_execute(task);
 
+            fq_task_destroy(task);
+
             fq_atomic_fetch_sub_explicit(&s->tasks_active, 1,
                                          FQ_MEMORY_ORDER_RELEASE);
             fq_atomic_fetch_add_explicit(&s->tasks_completed, 1,

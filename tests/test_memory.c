@@ -41,7 +41,7 @@ int test_memory_alloc(void)
     if (fq_align_up(9, 8) != 16) return 10;
 
     /* Is-aligned. */
-    int x;
+    int x = 42;
     if (!fq_is_aligned(&x, 1)) return 11;
 
     /* NULL free is safe. */
