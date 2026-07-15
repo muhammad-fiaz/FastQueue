@@ -15,7 +15,7 @@
 #ifndef FQ_PLATFORM_H
 #define FQ_PLATFORM_H
 
-/* ── Feature-test macros ─────────────────────────────────────────────── */
+ 
 
 /**
  * @def FQ_C_VERSION
@@ -39,7 +39,7 @@
 #    define FQ_C23_FEATURES 1
 #endif
 
-/* ── Compiler detection ──────────────────────────────────────────────── */
+ 
 
 /**
  * @def FQ_COMPILER_GCC
@@ -65,7 +65,7 @@
 #    define FQ_COMPILER_MSVC 1
 #endif
 
-/* ── OS detection ────────────────────────────────────────────────────── */
+ 
 
 /**
  * @def FQ_OS_LINUX
@@ -99,7 +99,7 @@
 #    define FQ_OS_POSIX 1
 #endif
 
-/* ── CPU architecture detection ──────────────────────────────────────── */
+ 
 
 /**
  * @def FQ_ARCH_X86_64
@@ -133,7 +133,7 @@
 #    define FQ_ARCH_ARM 1
 #endif
 
-/* ── CPU cache-line size ─────────────────────────────────────────────── */
+ 
 
 /**
  * @def FQ_CACHE_LINE_SIZE
@@ -145,7 +145,7 @@
 #    define FQ_CACHE_LINE_SIZE 64
 #endif
 
-/* ── Compiler attribute / intrinsic abstractions ─────────────────────── */
+ 
 
 /**
  * @def FQ_LIKELY
@@ -299,7 +299,7 @@
 #    define FQ_UNUSED
 #endif
 
-/* ── Platform-specific headers ───────────────────────────────────────── */
+ 
 
 #ifdef FQ_OS_POSIX
 #    include <pthread.h>
@@ -314,7 +314,7 @@
 #    include <process.h>
 #endif
 
-/* ── Platform thread primitives ──────────────────────────────────────── */
+ 
 
 /**
  * @struct fq_thread_t
@@ -373,7 +373,7 @@ typedef struct fq_condition_t {
  */
 typedef int (*fq_thread_func_t)(void *arg);
 
-/* ── Thread API ──────────────────────────────────────────────────────── */
+ 
 
 /**
  * @brief Create and start a thread.
@@ -421,7 +421,7 @@ FQ_API void fq_thread_yield(void);
  */
 FQ_API void fq_thread_sleep_ms(unsigned ms);
 
-/* ── Mutex API ───────────────────────────────────────────────────────── */
+ 
 
 /**
  * @brief Initialise a mutex.
@@ -460,7 +460,7 @@ FQ_API int fq_mutex_trylock(fq_mutex_t *mutex);
  */
 FQ_API void fq_mutex_unlock(fq_mutex_t *mutex);
 
-/* ── Condition variable API ──────────────────────────────────────────── */
+ 
 
 /**
  * @brief Initialise a condition variable.

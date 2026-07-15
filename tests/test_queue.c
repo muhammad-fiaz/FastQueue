@@ -7,7 +7,7 @@
 
 #include <stdio.h>
 
-/* ── Test: basic push/pop ────────────────────────────────────────────── */
+ 
 
 int test_queue_basic(void)
 {
@@ -64,7 +64,7 @@ int test_queue_basic(void)
     return 0;
 }
 
-/* ── Test: concurrent push/pop ───────────────────────────────────────── */
+ 
 
 typedef struct {
     fq_queue_t *queue;

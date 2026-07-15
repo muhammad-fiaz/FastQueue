@@ -20,10 +20,10 @@
 #include <string.h>
 #include <stdio.h>
 
-/* ── Internal function from task.c (not in public header) ─────────────── */
+ 
 void fq_task_execute(fq_task_t *task);
 
-/* ── Internal structures ─────────────────────────────────────────────── */
+ 
 
 typedef struct fq_worker_t {
     fq_thread_t     thread;
@@ -53,7 +53,7 @@ struct fq_scheduler_t {
     fq_log_level_t         log_level;
 };
 
-/* ── Logging helper ──────────────────────────────────────────────────── */
+ 
 
 static void log_msg(fq_scheduler_t *s, fq_log_level_t level, const char *msg)
 {
@@ -61,7 +61,7 @@ static void log_msg(fq_scheduler_t *s, fq_log_level_t level, const char *msg)
         s->log_callback(level, msg, s->log_context);
 }
 
-/* ── Worker thread entry ─────────────────────────────────────────────── */
+ 
 
 static fq_bool_t try_steal(fq_scheduler_t *s, fq_worker_t *thief,
                             fq_task_t **out)
@@ -131,7 +131,7 @@ static int worker_main(void *arg)
     return 0;
 }
 
-/* ── Configuration ───────────────────────────────────────────────────── */
+ 
 
 void fq_scheduler_config_default(fq_scheduler_config_t *config)
 {
@@ -147,7 +147,7 @@ void fq_scheduler_config_default(fq_scheduler_config_t *config)
     config->log_level              = FQ_DEFAULT_LOG_LEVEL;
 }
 
-/* ── Creation / shutdown ─────────────────────────────────────────────── */
+ 
 
 fq_status_t fq_scheduler_create(fq_scheduler_t **scheduler,
                                 const fq_scheduler_config_t *config)
@@ -299,7 +299,7 @@ void fq_scheduler_cancel_all(fq_scheduler_t *scheduler)
     fq_condition_broadcast(&scheduler->idle_cond);
 }
 
-/* ── Submission ──────────────────────────────────────────────────────── */
+ 
 
 fq_status_t fq_scheduler_submit(fq_scheduler_t *scheduler, fq_task_t *task)
 {
@@ -368,7 +368,7 @@ fq_status_t fq_scheduler_submit_fn(fq_scheduler_t *scheduler,
     return st;
 }
 
-/* ── Wait / idle ─────────────────────────────────────────────────────── */
+ 
 
 void fq_scheduler_wait_idle(fq_scheduler_t *scheduler)
 {
@@ -401,7 +401,7 @@ fq_bool_t fq_scheduler_is_shutdown(const fq_scheduler_t *scheduler)
                FQ_MEMORY_ORDER_ACQUIRE) != 0;
 }
 
-/* ── Statistics ──────────────────────────────────────────────────────── */
+ 
 
 void fq_scheduler_stats(const fq_scheduler_t *scheduler,
                         fq_scheduler_stats_t *stats)

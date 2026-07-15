@@ -14,7 +14,7 @@
 
 #ifdef FQ_OS_POSIX
 
-/* ── Thread ──────────────────────────────────────────────────────────── */
+ 
 
 struct fq_thread_arg_t {
     fq_thread_func_t func;
@@ -81,7 +81,7 @@ void fq_thread_sleep_ms(unsigned ms)
     nanosleep(&ts, NULL);
 }
 
-/* ── Mutex ───────────────────────────────────────────────────────────── */
+ 
 
 int fq_mutex_init(fq_mutex_t *mutex)
 {
@@ -115,7 +115,7 @@ void fq_mutex_unlock(fq_mutex_t *mutex)
     if (mutex) pthread_mutex_unlock(&mutex->handle);
 }
 
-/* ── Condition variable ──────────────────────────────────────────────── */
+ 
 
 int fq_condition_init(fq_condition_t *cond)
 {
@@ -169,7 +169,7 @@ void fq_condition_broadcast(fq_condition_t *cond)
 
 #ifdef FQ_OS_WINDOWS
 
-/* ── Thread ──────────────────────────────────────────────────────────── */
+ 
 
 struct fq_thread_arg_t {
     fq_thread_func_t func;
@@ -244,7 +244,7 @@ void fq_thread_sleep_ms(unsigned ms)
     Sleep((DWORD)ms);
 }
 
-/* ── Mutex ───────────────────────────────────────────────────────────── */
+ 
 
 int fq_mutex_init(fq_mutex_t *mutex)
 {
@@ -274,7 +274,7 @@ void fq_mutex_unlock(fq_mutex_t *mutex)
     if (mutex) ReleaseSRWLockExclusive(&mutex->handle);
 }
 
-/* ── Condition variable ──────────────────────────────────────────────── */
+ 
 
 int fq_condition_init(fq_condition_t *cond)
 {

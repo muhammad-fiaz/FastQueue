@@ -15,7 +15,7 @@
 
 #include <string.h>
 
-/* ── Internal structure ──────────────────────────────────────────────── */
+ 
 
 struct fq_queue_t {
     fq_task_t           **buffer;
@@ -44,7 +44,7 @@ static size_t next_pow2(size_t v)
     return v + 1;
 }
 
-/* ── Creation / destruction ──────────────────────────────────────────── */
+ 
 
 fq_status_t fq_queue_create(fq_queue_t **queue, size_t capacity,
                             const fq_allocator_t *allocator)
@@ -89,7 +89,7 @@ void fq_queue_destroy(fq_queue_t *queue)
     fq_free(queue->allocator, queue);
 }
 
-/* ── Push / pop ──────────────────────────────────────────────────────── */
+ 
 
 fq_status_t fq_queue_push(fq_queue_t *queue, fq_task_t *task)
 {
@@ -142,7 +142,7 @@ fq_status_t fq_queue_try_pop(fq_queue_t *queue, fq_task_t **task)
     return fq_queue_pop(queue, task);
 }
 
-/* ── Queries ─────────────────────────────────────────────────────────── */
+ 
 
 size_t fq_queue_size(const fq_queue_t *queue)
 {

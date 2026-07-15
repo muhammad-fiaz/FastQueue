@@ -125,7 +125,7 @@ fq_bool_t fq_scheduler_is_idle(const fq_scheduler_t *scheduler);
  */
 fq_bool_t fq_scheduler_is_shutdown(const fq_scheduler_t *scheduler);
 
-/* ── Statistics ──────────────────────────────────────────────────────── */
+ 
 
 /**
  * @struct fq_scheduler_stats_t

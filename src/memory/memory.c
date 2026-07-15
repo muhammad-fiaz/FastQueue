@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* ── Global statistics ───────────────────────────────────────────────── */
+ 
 
 static fq_atomic_int_t g_alloc_count  = FQ_ATOMIC_INIT(0);
 static fq_atomic_int_t g_free_count   = FQ_ATOMIC_INIT(0);
@@ -43,7 +43,7 @@ static void stats_free(size_t size)
     fq_atomic_fetch_add_explicit(&g_free_count, 1, FQ_MEMORY_ORDER_RELAXED);
 }
 
-/* ── Default allocator ───────────────────────────────────────────────── */
+ 
 
 static void *default_alloc(size_t size, void *ctx)
 {
@@ -82,7 +82,7 @@ const fq_allocator_t *fq_default_allocator(void)
     return &g_default_allocator;
 }
 
-/* ── Public wrappers ─────────────────────────────────────────────────── */
+ 
 
 void *fq_alloc(const fq_allocator_t *alloc, size_t size)
 {
@@ -111,7 +111,7 @@ void fq_free(const fq_allocator_t *alloc, void *ptr)
     alloc->free(ptr, alloc->ctx);
 }
 
-/* ── Alignment ───────────────────────────────────────────────────────── */
+ 
 
 size_t fq_align_up(size_t size, size_t alignment)
 {
@@ -126,7 +126,7 @@ fq_bool_t fq_is_aligned(const void *ptr, size_t alignment)
     return ((uintptr_t)ptr & (alignment - 1)) == 0;
 }
 
-/* ── Statistics ──────────────────────────────────────────────────────── */
+ 
 
 void fq_mem_stats(fq_mem_stats_t *stats)
 {

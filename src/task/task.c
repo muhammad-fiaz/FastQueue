@@ -11,7 +11,7 @@
 
 #include <string.h>
 
-/* ── Internal structure ──────────────────────────────────────────────── */
+ 
 
 struct fq_task_t {
     fq_task_fn          callback;
@@ -25,7 +25,7 @@ struct fq_task_t {
     const fq_allocator_t *allocator;
 };
 
-/* ── Creation / destruction ──────────────────────────────────────────── */
+ 
 
 fq_status_t fq_task_create(fq_task_t **task, fq_task_fn callback,
                            void *user_data, const fq_allocator_t *allocator)
@@ -74,7 +74,7 @@ void fq_task_destroy(fq_task_t *task)
     fq_free(task->allocator, task);
 }
 
-/* ── Accessors ───────────────────────────────────────────────────────── */
+ 
 
 void *fq_task_user_data(const fq_task_t *task)
 {
@@ -119,7 +119,7 @@ fq_bool_t fq_task_is_canceled(const fq_task_t *task)
                    : FQ_FALSE;
 }
 
-/* ── Internal: execute the task (called by worker threads) ───────────── */
+ 
 
 /**
  * @brief Execute a task's callback and invoke completion.

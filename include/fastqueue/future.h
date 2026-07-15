@@ -110,7 +110,7 @@ fq_status_t fq_future_on_complete(fq_future_t *future,
  */
 fq_status_t fq_future_cancel(fq_future_t *future);
 
-/* ── Promise (internal use, exposed for advanced users) ──────────────── */
+ 
 
 /**
  * @brief Fulfill a future with a result status.

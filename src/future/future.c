@@ -11,7 +11,7 @@
 
 #include <string.h>
 
-/* ── Internal structure ──────────────────────────────────────────────── */
+ 
 
 struct fq_future_t {
     fq_atomic_int_t     ready;      /* 0 = pending, 1 = fulfilled */
@@ -24,7 +24,7 @@ struct fq_future_t {
     const fq_allocator_t *allocator;
 };
 
-/* ── Creation / destruction ──────────────────────────────────────────── */
+ 
 
 fq_status_t fq_future_create(fq_future_t **future,
                              const fq_allocator_t *allocator)
@@ -70,7 +70,7 @@ void fq_future_destroy(fq_future_t *future)
     fq_free(future->allocator, future);
 }
 
-/* ── Waiting ─────────────────────────────────────────────────────────── */
+ 
 
 fq_status_t fq_future_wait(fq_future_t *future)
 {
@@ -124,7 +124,7 @@ fq_status_t fq_future_wait_timeout(fq_future_t *future,
     return FQ_OK;
 }
 
-/* ── Queries ─────────────────────────────────────────────────────────── */
+ 
 
 fq_bool_t fq_future_is_ready(const fq_future_t *future)
 {
@@ -151,7 +151,7 @@ fq_status_t fq_future_status(const fq_future_t *future)
     return future->status;
 }
 
-/* ── Completion callback ─────────────────────────────────────────────── */
+ 
 
 fq_status_t fq_future_on_complete(fq_future_t *future,
                                   fq_completion_fn callback,
@@ -173,7 +173,7 @@ fq_status_t fq_future_on_complete(fq_future_t *future,
     return FQ_OK;
 }
 
-/* ── Cancel ──────────────────────────────────────────────────────────── */
+ 
 
 fq_status_t fq_future_cancel(fq_future_t *future)
 {
@@ -190,7 +190,7 @@ fq_status_t fq_future_cancel(fq_future_t *future)
     return FQ_OK;
 }
 
-/* ── Set result (called by scheduler / task) ─────────────────────────── */
+ 
 
 void fq_future_set_result(fq_future_t *future, fq_status_t status)
 {

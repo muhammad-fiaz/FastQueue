@@ -21,7 +21,7 @@
 extern "C" {
 #endif
 
-/* ── Status / result codes ───────────────────────────────────────────── */
+ 
 
 /**
  * @enum fq_status_t
@@ -40,7 +40,7 @@ typedef enum fq_status_t {
     FQ_ERR_NOSUPPORT = -9   /**< Operation not supported. */
 } fq_status_t;
 
-/* ── Forward declarations ────────────────────────────────────────────── */
+ 
 
 /**
  * @struct fq_system_t
@@ -78,7 +78,7 @@ typedef struct fq_scheduler_t fq_scheduler_t;
  */
 typedef struct fq_scheduler_t fq_thread_pool_t;
 
-/* ── Priority ────────────────────────────────────────────────────────── */
+ 
 
 /**
  * @enum fq_priority_t
@@ -91,7 +91,7 @@ typedef enum fq_priority_t {
     FQ_PRIORITY_URGENT = 3   /**< Urgent / realtime-like. */
 } fq_priority_t;
 
-/* ── Callback signatures ─────────────────────────────────────────────── */
+ 
 
 /**
  * @brief Task callback function pointer.
@@ -108,7 +108,7 @@ typedef void (*fq_task_fn)(void *user_data);
  */
 typedef void (*fq_completion_fn)(void *user_data, fq_status_t status);
 
-/* ── Custom allocator ────────────────────────────────────────────────── */
+ 
 
 /**
  * @struct fq_allocator_t
@@ -124,7 +124,7 @@ typedef struct fq_allocator_t {
     void  *ctx;                                  /**< User context. */
 } fq_allocator_t;
 
-/* ── Logger hook ─────────────────────────────────────────────────────── */
+ 
 
 /**
  * @enum fq_log_level_t
@@ -147,7 +147,7 @@ typedef enum fq_log_level_t {
  */
 typedef void (*fq_log_fn)(fq_log_level_t level, const char *message, void *ctx);
 
-/* ── Convenience aliases ─────────────────────────────────────────────── */
+ 
 
 /**
  * @typedef fq_bool_t

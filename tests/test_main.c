@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* ── Test declarations ───────────────────────────────────────────────── */
+ 
 
 extern int test_queue_basic(void);
 extern int test_queue_concurrent(void);
@@ -28,7 +28,7 @@ extern int test_memory_alloc(void);
 extern int test_errors(void);
 extern int test_stress_many_jobs(void);
 
-/* ── Test table ──────────────────────────────────────────────────────── */
+ 
 
 typedef struct test_entry_t {
     const char *name;
@@ -52,7 +52,7 @@ static test_entry_t g_tests[] = {
     { NULL, NULL }
 };
 
-/* ── Main ────────────────────────────────────────────────────────────── */
+ 
 
 int main(void)
 {

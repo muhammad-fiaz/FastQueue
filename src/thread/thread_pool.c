@@ -8,7 +8,7 @@
 #include "fastqueue/thread_pool.h"
 #include "fastqueue/memory.h"
 
-/* ── A thread pool is literally a scheduler ──────────────────────────── */
+ 
 
 fq_status_t fq_thread_pool_create(fq_thread_pool_t **pool)
 {

@@ -7,7 +7,7 @@
 
 #include <stdio.h>
 
-/* ── Basic scheduler test ────────────────────────────────────────────── */
+ 
 
 static int g_counter = 0;
 static fq_mutex_t g_mutex;
@@ -60,7 +60,7 @@ int test_scheduler_basic(void)
     return 0;
 }
 
-/* ── Thread pool test ────────────────────────────────────────────────── */
+ 
 
 int test_thread_pool_basic(void)
 {
@@ -97,7 +97,7 @@ int test_thread_pool_basic(void)
     return 0;
 }
 
-/* ── Stress test ─────────────────────────────────────────────────────── */
+ 
 
 static int g_stress_counter = 0;
 

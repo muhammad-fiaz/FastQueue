@@ -17,7 +17,7 @@
 extern "C" {
 #endif
 
-/* ── Default allocator (uses standard malloc/free) ───────────────────── */
+ 
 
 /**
  * @brief Return the default system allocator.
@@ -65,7 +65,7 @@ void *fq_realloc(const fq_allocator_t *alloc, void *ptr, size_t size);
  */
 void fq_free(const fq_allocator_t *alloc, void *ptr);
 
-/* ── Alignment utilities ─────────────────────────────────────────────── */
+ 
 
 /**
  * @brief Round @p size up to the nearest multiple of @p alignment.
@@ -85,7 +85,7 @@ size_t fq_align_up(size_t size, size_t alignment);
  */
 fq_bool_t fq_is_aligned(const void *ptr, size_t alignment);
 
-/* ── Memory statistics ───────────────────────────────────────────────── */
+ 
 
 /**
  * @struct fq_mem_stats_t
