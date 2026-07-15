@@ -386,13 +386,28 @@ void fq_scheduler_wait_idle(fq_scheduler_t *scheduler)
 fq_bool_t fq_scheduler_is_idle(const fq_scheduler_t *scheduler)
 {
     if (!scheduler) return FQ_TRUE;
-    return fq_queue_empty(scheduler->global_queue) &&
-           fq_atomic_load_explicit(
-               &((fq_scheduler_t *)scheduler)->tasks_active,
-               FQ_MEMORY_ORDER_ACQUIRE) == 0 &&
-           fq_atomic_load_explicit(
-               &((fq_scheduler_t *)scheduler)->tasks_pending,
-               FQ_MEMORY_ORDER_ACQUIRE) == 0;
+
+    /* Read all three counters.  If pending + active == 0 and the queue is
+       empty, every submitted task has been completed or cancelled. */
+    int pending = fq_atomic_load_explicit(
+        &((fq_scheduler_t *)scheduler)->tasks_pending,
+        FQ_MEMORY_ORDER_ACQUIRE);
+    int active = fq_atomic_load_explicit(
+        &((fq_scheduler_t *)scheduler)->tasks_active,
+        FQ_MEMORY_ORDER_ACQUIRE);
+
+    if (pending != 0 || active != 0) return FQ_FALSE;
+
+    /* Second pass to close the TOCTOU window where a worker pops a task
+       between our two reads. */
+    pending = fq_atomic_load_explicit(
+        &((fq_scheduler_t *)scheduler)->tasks_pending,
+        FQ_MEMORY_ORDER_ACQUIRE);
+    active = fq_atomic_load_explicit(
+        &((fq_scheduler_t *)scheduler)->tasks_active,
+        FQ_MEMORY_ORDER_ACQUIRE);
+
+    return pending == 0 && active == 0;
 }
 
 fq_bool_t fq_scheduler_is_shutdown(const fq_scheduler_t *scheduler)
