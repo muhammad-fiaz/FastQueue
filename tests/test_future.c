@@ -7,12 +7,6 @@
 
 #include <stdio.h>
 
-static void set_flag_task(void *arg)
-{
-    int *flag = (int *)arg;
-    *flag = 1;
-}
-
 int test_future_wait(void)
 {
     fq_future_t *f = NULL;
