@@ -48,7 +48,6 @@ jobs:
       - name: Configure
         run: >
           cmake -B build
-          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
           -DFQ_BUILD_TESTS=ON
           -DFQ_BUILD_EXAMPLES=ON
 
@@ -56,7 +55,9 @@ jobs:
         run: cmake --build build --config ${{ matrix.build_type }}
 
       - name: Test
-        run: ctest --test-dir build --config ${{ matrix.build_type }} --output-on-failure
+        run: |
+          cd build
+          ctest -C ${{ matrix.build_type }} --output-on-failure
 
   macos:
     runs-on: macos-latest

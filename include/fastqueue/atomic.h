@@ -29,7 +29,13 @@ typedef _Atomic unsigned      fq_atomic_uint_t;
 typedef _Atomic long          fq_atomic_long_t;
 typedef _Atomic unsigned long fq_atomic_ulong_t;
 
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L
+#define FQ_ATOMIC_INIT(val) (val)
+#elif defined(ATOMIC_VAR_INIT)
 #define FQ_ATOMIC_INIT(val) ATOMIC_VAR_INIT(val)
+#else
+#define FQ_ATOMIC_INIT(val) (val)
+#endif
 
 static inline int fq_atomic_load_explicit(volatile fq_atomic_int_t *a, int order)
 {
