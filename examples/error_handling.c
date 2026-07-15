@@ -7,15 +7,6 @@
 
 #include <stdio.h>
 
-static void might_fail(void *arg)
-{
-    int *counter = (int *)arg;
-    (*counter)++;
-    if (*counter == 5) {
-        fq_set_error("deliberate error at task %d", *counter);
-    }
-}
-
 int main(void)
 {
     printf("FastQueue v%s — Error Handling Example\n\n",

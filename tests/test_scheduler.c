@@ -99,7 +99,7 @@ int test_thread_pool_basic(void)
 
  
 
-static int g_stress_counter = 0;
+static fq_atomic_int_t g_stress_counter = FQ_ATOMIC_INIT(0);
 
 static void stress_task(void *arg)
 {
@@ -118,7 +118,7 @@ int test_scheduler_stress(void)
 
     if (fq_scheduler_create(&s, &cfg) != FQ_OK) return 1;
 
-    g_stress_counter = 0;
+    fq_atomic_store(&g_stress_counter, 0);
 
     for (int i = 0; i < 100; ++i) {
         if (fq_scheduler_submit_fn(s, stress_task, NULL) != FQ_OK) {
@@ -129,7 +129,7 @@ int test_scheduler_stress(void)
 
     fq_scheduler_wait_idle(s);
 
-    if (g_stress_counter != 100 * 1000) {
+    if (fq_atomic_load(&g_stress_counter) != 100 * 1000) {
         fq_scheduler_shutdown(s);
         return 3;
     }
@@ -148,7 +148,7 @@ int test_stress_many_jobs(void)
 
     if (fq_scheduler_create(&s, &cfg) != FQ_OK) return 1;
 
-    g_stress_counter = 0;
+    fq_atomic_store(&g_stress_counter, 0);
 
     for (int i = 0; i < 10000; ++i) {
         if (fq_scheduler_submit_fn(s, stress_task, NULL) != FQ_OK) {
@@ -160,7 +160,7 @@ int test_stress_many_jobs(void)
     fq_scheduler_wait_idle(s);
 
     /* Each task increments 1000 times. */
-    if (g_stress_counter != 10000 * 1000) {
+    if (fq_atomic_load(&g_stress_counter) != 10000 * 1000) {
         fq_scheduler_shutdown(s);
         return 3;
     }
