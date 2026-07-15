@@ -2,9 +2,8 @@
 
 # FastQueue
 
-**Production-ready, high-performance Job System & Thread Pool Library in ISO C23.**
+**Production-ready, high-performance Job System & Thread Pool Library**
 
-A lightweight, zero-dependency C23 library providing work-stealing thread pools, MPMC task queues, futures, and custom allocator support for building high-performance concurrent applications.
 
 [![CI](https://github.com/muhammad-fiaz/FastQueue/actions/workflows/ci.yml/badge.svg)](https://github.com/muhammad-fiaz/FastQueue/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -12,6 +11,9 @@ A lightweight, zero-dependency C23 library providing work-stealing thread pools,
 [![Documentation](https://img.shields.io/badge/Docs-VitePress-brightgreen.svg)](https://muhammad-fiaz.github.io/FastQueue/)
 
 </div>
+
+
+A lightweight, zero-dependency C23 library providing work-stealing thread pools, MPMC task queues, futures, and custom allocator support for building high-performance concurrent applications.
 
 ## Features
 

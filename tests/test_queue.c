@@ -20,10 +20,6 @@ int test_queue_basic(void)
 
     /* Create dummy tasks. */
     fq_task_t *t1 = NULL, *t2 = NULL, *t3 = NULL;
-    fq_task_fn noop = (fq_task_fn)(void (*)(void))NULL;
-    /* We need a valid function pointer. */
-    static int sink_var = 0;
-    (void)sink_var;
 
     st = fq_task_create(&t1, (fq_task_fn)1, (void *)1, NULL);
     if (st != FQ_OK) { fq_queue_destroy(q); return 4; }

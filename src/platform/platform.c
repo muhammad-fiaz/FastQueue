@@ -3,7 +3,11 @@
  * @brief Platform thread / mutex / condition-variable implementation.
  */
 
-#if defined(__linux__) || defined(__APPLE__) || defined(__unix__)
+#if defined(__APPLE__)
+#    if !defined(_DARWIN_C_SOURCE)
+#        define _DARWIN_C_SOURCE
+#    endif
+#elif defined(__linux__) || defined(__unix__)
 #    if !defined(_GNU_SOURCE)
 #        define _GNU_SOURCE
 #    endif

@@ -302,11 +302,14 @@
  
 
 #ifdef FQ_OS_POSIX
-#    if !defined(_GNU_SOURCE) && (defined(__linux__) || defined(__APPLE__) || defined(__unix__))
-#        define _GNU_SOURCE
-#    endif
-#    if !defined(_POSIX_C_SOURCE) && (defined(__linux__) || defined(__APPLE__) || defined(__unix__))
-#        define _POSIX_C_SOURCE 200809L
+#    if defined(__APPLE__)
+#        if !defined(_DARWIN_C_SOURCE)
+#            define _DARWIN_C_SOURCE
+#        endif
+#    elif defined(__linux__) || defined(__unix__)
+#        if !defined(_GNU_SOURCE)
+#            define _GNU_SOURCE
+#        endif
 #    endif
 #    include <pthread.h>
 #    include <unistd.h>
