@@ -1,55 +1,141 @@
+---
+title: Installation
+description: Detailed installation guide for FastQueue across all platforms and package managers.
+keywords: fastqueue install, cmake, xmake, conan, vcpkg, package manager
+---
+
 # Installation
+
+FastQueue supports multiple installation methods across all platforms.
 
 ## Requirements
 
-| Requirement | Version |
+| Requirement | Minimum Version |
 |---|---|
-| C compiler | GCC 14+, Clang 18+, MSVC 2022+ |
+| C Compiler | C23 (GCC 14+, Clang 18+, MSVC 2022+) |
 | CMake | 3.20+ |
-| C standard | C23 |
+| pthreads | Linux/macOS only |
+| Win32 API | Windows only |
 
-## Build from Source
+## Package Managers
 
-```bash
-git clone https://github.com/fastqueue/fastqueue.git
-cd fastqueue
-cmake -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build
-cmake --install build --prefix /usr/local
-```
-
-## CMake Options
-
-| Option | Default | Description |
-|---|---|---|
-| `FQ_BUILD_TESTS` | `OFF` | Build unit tests |
-| `FQ_BUILD_EXAMPLES` | `OFF` | Build example programs |
-| `FQ_BUILD_BENCHMARKS` | `OFF` | Build benchmarks |
-| `FQ_BUILD_DOCS` | `OFF` | Generate documentation |
-| `FQ_SHARED` | `OFF` | Build as shared library |
-| `FQ_INSTALL` | `ON` | Generate install targets |
-| `FQ_ENABLE_ASAN` | `OFF` | Enable AddressSanitizer |
-| `FQ_ENABLE_UBSAN` | `OFF` | Enable UBSan |
-| `FQ_ENABLE_TSAN` | `OFF` | Enable ThreadSanitizer |
-
-## Integration
-
-### add_subdirectory
-
-```cmake
-add_subdirectory(path/to/fastqueue)
-target_link_libraries(your_target PRIVATE FastQueue::fastqueue)
-```
-
-### FetchContent
+### CMake (FetchContent)
 
 ```cmake
 include(FetchContent)
 FetchContent_Declare(
-    fastqueue
-    GIT_REPOSITORY https://github.com/fastqueue/fastqueue.git
-    GIT_TAG v0.1.0
+    FastQueue
+    GIT_REPOSITORY https://github.com/muhammad-fiaz/FastQueue.git
+    GIT_TAG main
 )
-FetchContent_MakeAvailable(fastqueue)
+FetchContent_MakeAvailable(FastQueue)
 target_link_libraries(your_target PRIVATE FastQueue::fastqueue)
+```
+
+### CMake (subdirectory)
+
+```bash
+git clone https://github.com/muhammad-fiaz/FastQueue.git
+```
+
+```cmake
+add_subdirectory(FastQueue)
+target_link_libraries(your_target PRIVATE FastQueue::fastqueue)
+```
+
+### xmake
+
+```lua
+add_requires("fastqueue")
+target("myapp")
+    set_kind("binary")
+    add_files("src/main.c")
+    add_packages("fastqueue")
+```
+
+### Conan
+
+```ini
+[requires]
+fastqueue/0.1.0
+
+[generators]
+CMakeDeps
+CMakeToolchain
+```
+
+```bash
+conan install . --output-folder=build --build=missing
+cmake --preset conan-release
+```
+
+### vcpkg
+
+```bash
+vcpkg install fastqueue
+```
+
+## Building from Source
+
+```bash
+git clone https://github.com/muhammad-fiaz/FastQueue.git
+cd FastQueue
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+```
+
+### CMake Options
+
+| Option | Default | Description |
+|---|---|---|
+| `FQ_BUILD_TESTS` | OFF | Build unit tests |
+| `FQ_BUILD_EXAMPLES` | OFF | Build examples |
+| `FQ_BUILD_BENCHMARKS` | OFF | Build benchmarks |
+| `FQ_SHARED` | OFF | Build shared library |
+| `FQ_INSTALL` | ON | Generate install targets |
+| `FQ_ENABLE_ASAN` | OFF | AddressSanitizer |
+| `FQ_ENABLE_UBSAN` | OFF | UndefinedBehaviorSanitizer |
+| `FQ_ENABLE_TSAN` | OFF | ThreadSanitizer |
+
+### Example Build Commands
+
+```bash
+# Release build
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+
+# Debug build with tests and examples
+cmake -B build -DCMAKE_BUILD_TYPE=Debug -DFQ_BUILD_TESTS=ON -DFQ_BUILD_EXAMPLES=ON
+cmake --build build --config Debug
+
+# Run tests
+./build/tests/Release/fq_tests
+
+# Run benchmark
+./build/benchmarks/Release/fq_benchmark
+```
+
+## Platform-Specific Notes
+
+### Linux
+
+Requires pthreads (usually available by default):
+
+```bash
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+```
+
+### Windows (MSVC)
+
+```cmd
+cmake -B build -G "Visual Studio 17 2022" -A x64
+cmake --build build --config Release
+```
+
+### macOS
+
+```bash
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
 ```

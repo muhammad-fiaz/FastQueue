@@ -401,6 +401,18 @@ gtag('config', '${GA_ID}');`,
         ],
       },
       {
+        text: "Examples",
+        items: [
+          { text: "All Examples", link: "/examples/" },
+          { text: "Basic Jobs", link: "/examples/basic-jobs" },
+          { text: "Futures", link: "/examples/futures" },
+          { text: "Parallel For", link: "/examples/parallel-for" },
+          { text: "Custom Allocator", link: "/examples/custom-allocator" },
+          { text: "Graceful Shutdown", link: "/examples/graceful-shutdown" },
+          { text: "Error Handling", link: "/examples/error-handling" },
+        ],
+      },
+      {
         text: "API Reference",
         items: [
           { text: "Overview", link: "/api/overview" },

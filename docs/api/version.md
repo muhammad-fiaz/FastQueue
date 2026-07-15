@@ -1,31 +1,54 @@
+---
+title: Version API
+description: FastQueue version information and compatibility API reference.
+keywords: version, fq_version, compatibility
+---
+
 # Version API
 
-Header: `<fastqueue/version.h>`
+Version information and compatibility checks.
 
-## Macros
+## Constants
 
-| Macro | Value | Description |
-|---|---|---|
-| `FQ_VERSION_MAJOR` | 0 | Major version |
-| `FQ_VERSION_MINOR` | 1 | Minor version |
-| `FQ_VERSION_PATCH` | 0 | Patch version |
-| `FQ_VERSION_STRING` | "0.1.0" | Human-readable version |
-| `FQ_VERSION_HEX` | 0x000100 | Encoded version |
+```c
+FQ_VERSION_MAJOR   // e.g. 0
+FQ_VERSION_MINOR   // e.g. 1
+FQ_VERSION_PATCH   // e.g. 0
+FQ_VERSION_STRING  // e.g. "0.1.0"
+```
 
 ## Functions
-
-### fq_version_string
 
 ```c
 const char *fq_version_string(void);
 ```
-
-Returns the runtime version string.
-
-### fq_version_hex
+Get version string at runtime.
 
 ```c
-int fq_version_hex(void);
+unsigned fq_version_major(void);
+unsigned fq_version_minor(void);
+unsigned fq_version_patch(void);
 ```
+Get version components at runtime.
 
-Returns the encoded version as `0xMMmmpp`.
+```c
+unsigned fq_version_hex(void);
+```
+Get version as hex integer (e.g. `0x000100` for 0.1.0).
+
+## Example
+
+```c
+#include <fastqueue/fastqueue.h>
+#include <stdio.h>
+
+int main(void)
+{
+    printf("FastQueue v%s\n", fq_version_string());
+    printf("Version: %u.%u.%u\n",
+           fq_version_major(),
+           fq_version_minor(),
+           fq_version_patch());
+    return 0;
+}
+```

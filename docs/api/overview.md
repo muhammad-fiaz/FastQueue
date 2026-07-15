@@ -1,40 +1,80 @@
+---
+title: API Overview
+description: Complete API reference for FastQueue C23 thread pool and job system library.
+keywords: api, reference, fastqueue api, c23 api
+---
+
 # API Overview
 
-All public symbols are prefixed with `fq_` and declared in `<fastqueue/fastqueue.h>`.
+FastQueue provides a layered API:
 
 ## Headers
 
 | Header | Description |
 |---|---|
-| `fastqueue.h` | Umbrella header — include this for everything |
-| `types.h` | Core type definitions |
-| `errors.h` | Error codes and handling |
-| `version.h` | Version information |
-| `config.h` | Compile-time configuration |
-| `platform.h` | Platform detection and thread primitives |
-| `atomic.h` | Portable atomic operations |
-| `memory.h` | Custom allocator interface |
-| `task.h` | Task creation and management |
-| `queue.h` | Thread-safe queues |
-| `future.h` | Futures and promises |
-| `scheduler.h` | Job scheduler |
-| `thread_pool.h` | High-level thread pool API |
+| `fastqueue/fastqueue.h` | Master include (includes everything) |
+| `fastqueue/thread_pool.h` | High-level thread pool API |
+| `fastqueue/scheduler.h` | Low-level scheduler API |
+| `fastqueue/queue.h` | Thread-safe queue |
+| `fastqueue/future.h` | Futures and promises |
+| `fastqueue/task.h` | Task creation and management |
+| `fastqueue/memory.h` | Custom allocator support |
+| `fastqueue/errors.h` | Error codes and messages |
+| `fastqueue/config.h` | Configuration constants |
+| `fastqueue/version.h` | Version information |
+| `fastqueue/atomic.h` | Atomic operations |
+| `fastqueue/platform.h` | Platform abstraction |
+| `fastqueue/types.h` | Type definitions |
 
 ## Naming Conventions
 
+- All public symbols prefixed with `fq_`
 - Types: `fq_<name>_t`
-- Functions: `fq_<module>_<verb>()`
-- Enums: `fq_<name>_t` with `FQ_<MODULE>_<VALUE>` values
-- Macros: `FQ_<NAME>`
+- Functions: `fq_<module>_<action>`
+- Enums: `fq_<name>_t` with `FQ_<NAME>_<VALUE>`
 - Constants: `FQ_<NAME>`
 
 ## Error Handling
 
-All functions return `fq_status_t` (negative = error). Check with `fq_status_ok()`:
+All functions return `fq_status_t`:
 
 ```c
-fq_status_t st = fq_scheduler_create(&scheduler, &config);
-if (!fq_status_ok(st)) {
-    fprintf(stderr, "Error: %s\n", fq_status_string(st));
+fq_status_t st = fq_thread_pool_create_ex(&pool, 4);
+if (st != FQ_OK) {
+    fprintf(stderr, "Error: %s\n", fq_error_string(st));
+    return 1;
 }
+```
+
+## Quick Reference
+
+### Thread Pool
+```c
+fq_thread_pool_create_ex(&pool, threads);
+fq_thread_pool_submit_fn(pool, fn, data);
+fq_thread_pool_wait_idle(pool);
+fq_thread_pool_shutdown(pool);
+```
+
+### Scheduler
+```c
+fq_scheduler_create(&scheduler, &cfg);
+fq_scheduler_submit_fn(scheduler, fn, data);
+fq_scheduler_wait_idle(scheduler);
+fq_scheduler_shutdown(scheduler);
+```
+
+### Future
+```c
+fq_future_create(&future, allocator);
+fq_future_wait(future);
+fq_future_destroy(future);
+```
+
+### Queue
+```c
+fq_queue_create(&queue, capacity, allocator);
+fq_queue_push(queue, task);
+fq_queue_pop(queue, &task);
+fq_queue_destroy(queue);
 ```

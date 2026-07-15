@@ -1,72 +1,60 @@
+---
+title: Future API
+description: FastQueue future API reference for awaitable task results.
+keywords: future api, fq_future, wait, timeout, ready
+---
+
 # Future API
 
-Header: `<fastqueue/future.h>`
+Awaitable results for task completion.
 
 ## Types
 
-### fq_future_t
-
-Opaque handle to an awaitable result.
+```c
+typedef struct fq_future_t fq_future_t;
+```
 
 ## Functions
 
-### fq_future_create
+### Creation
 
 ```c
-fq_status_t fq_future_create(fq_future_t **future,
-                             const fq_allocator_t *allocator);
-```
-
-### fq_future_destroy
-
-```c
+fq_status_t fq_future_create(fq_future_t **future, const fq_allocator_t *allocator);
 void fq_future_destroy(fq_future_t *future);
 ```
 
-### fq_future_wait
+### Waiting
 
 ```c
-fq_status_t fq_future_wait(fq_future_t *future);
+void fq_future_wait(fq_future_t *future);
 ```
-
-Block until fulfilled. Returns the result status.
-
-### fq_future_wait_timeout
+Block until the future is ready.
 
 ```c
-fq_status_t fq_future_wait_timeout(fq_future_t *future,
-                                   unsigned timeout_ms,
-                                   fq_status_t *status);
+fq_status_t fq_future_wait_timeout(fq_future_t *future, unsigned timeout_ms);
 ```
-
-Wait with timeout. Returns `FQ_ERR_TIMEOUT` on expiry.
-
-### fq_future_is_ready
+Block with timeout. Returns `FQ_OK` on success, `FQ_ERR_TIMEOUT` on timeout.
 
 ```c
 fq_bool_t fq_future_is_ready(const fq_future_t *future);
 ```
+Non-blocking check if ready.
 
-### fq_future_status
+### Status
 
 ```c
 fq_status_t fq_future_status(const fq_future_t *future);
 ```
-
-### fq_future_cancel
-
-```c
-fq_status_t fq_future_cancel(fq_future_t *future);
-```
-
-Cancel a pending future.
-
-### fq_future_on_complete
+Get the task's execution status.
 
 ```c
-fq_status_t fq_future_on_complete(fq_future_t *future,
-                                  fq_completion_fn callback,
-                                  void *user_data);
+fq_status_t fq_future_error(const fq_future_t *future);
 ```
+Get error if task failed.
 
-Attach a completion callback.
+### Promise (Internal)
+
+```c
+void fq_future_set_result(fq_future_t *future, void *result);
+void fq_future_set_error(fq_future_t *future, fq_status_t error);
+```

@@ -1,51 +1,153 @@
+---
+title: Memory Management
+description: Learn about FastQueue custom allocators and memory management for constrained environments.
+keywords: memory, allocator, custom allocator, memory management, fq_allocator
+---
+
 # Memory Management
 
 FastQueue supports pluggable allocators for memory-constrained environments.
 
 ## Default Allocator
 
-The default allocator uses standard `malloc`/`calloc`/`realloc`/`free`:
+By default, FastQueue uses the system `malloc`/`free`:
 
 ```c
-const fq_allocator_t *alloc = fq_default_allocator();
-void *p = fq_alloc(alloc, 1024);
-fq_free(alloc, p);
+fq_thread_pool_t *pool = NULL;
+fq_thread_pool_create_ex(&pool, 4); // Uses default allocator
 ```
 
 ## Custom Allocator
 
 ```c
-static void *my_alloc(size_t size, void *ctx) {
-    return my_custom_malloc(size, ctx);
+#include <fastqueue/fastqueue.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+static void *my_alloc(size_t size, void *ctx)
+{
+    (void)ctx;
+    printf("Allocating %zu bytes\n", size);
+    return malloc(size);
 }
 
-static void *my_realloc(void *ptr, size_t size, void *ctx) {
-    return my_custom_realloc(ptr, size, ctx);
+static void my_free(void *ptr, void *ctx)
+{
+    (void)ctx;
+    free(ptr);
 }
 
-static void my_free(void *ptr, void *ctx) {
-    my_custom_free(ptr, ctx);
+static void *my_calloc(size_t count, size_t size, void *ctx)
+{
+    (void)ctx;
+    return calloc(count, size);
 }
 
-fq_allocator_t alloc = {
-    .alloc   = my_alloc,
-    .realloc = my_realloc,
-    .free    = my_free,
-    .ctx     = &my_context,
-};
+static void *my_realloc(void *ptr, size_t new_size, void *ctx)
+{
+    (void)ctx;
+    return realloc(ptr, new_size);
+}
 
-// Pass to any create function
-fq_scheduler_config_t config;
-config.allocator = &alloc;
+int main(void)
+{
+    fq_allocator_t alloc = {
+        .alloc   = my_alloc,
+        .free    = my_free,
+        .calloc  = my_calloc,
+        .realloc = my_realloc,
+        .context = NULL
+    };
+
+    fq_scheduler_config_t cfg;
+    fq_scheduler_config_default(&cfg);
+    cfg.allocator = &alloc;
+    cfg.thread_count = 4;
+
+    fq_scheduler_t *scheduler = NULL;
+    fq_scheduler_create(&scheduler, &cfg);
+
+    // Use scheduler...
+
+    fq_scheduler_shutdown(scheduler);
+    return 0;
+}
 ```
 
-## Statistics
+## Arena Allocator Example
+
+For high-throughput scenarios, an arena allocator can reduce allocation overhead:
 
 ```c
-fq_mem_stats_t stats;
-fq_mem_stats(&stats);
+#include <fastqueue/fastqueue.h>
+#include <stdlib.h>
+#include <string.h>
 
-printf("Currently allocated: %zu bytes\n", stats.allocated_bytes);
-printf("Peak usage:          %zu bytes\n", stats.peak_bytes);
-printf("Total allocations:   %zu\n", stats.total_allocs);
+#define ARENA_SIZE (1024 * 1024)
+
+typedef struct {
+    char buffer[ARENA_SIZE];
+    size_t offset;
+} arena_t;
+
+static void *arena_alloc(size_t size, void *ctx)
+{
+    arena_t *arena = (arena_t *)ctx;
+    size_t aligned = (size + 7) & ~(size_t)7;
+    if (arena->offset + aligned > ARENA_SIZE) return NULL;
+    void *ptr = arena->buffer + arena->offset;
+    arena->offset += aligned;
+    return ptr;
+}
+
+static void arena_free(void *ptr, void *ctx)
+{
+    (void)ptr;
+    (void)ctx;
+}
+
+int main(void)
+{
+    static arena_t arena = {0};
+
+    fq_allocator_t alloc = {
+        .alloc   = arena_alloc,
+        .free    = arena_free,
+        .context = &arena
+    };
+
+    fq_thread_pool_t *pool = NULL;
+    fq_scheduler_config_t cfg;
+    fq_scheduler_config_default(&cfg);
+    cfg.allocator = &alloc;
+    cfg.thread_count = 4;
+
+    fq_thread_pool_create_configured(&pool, &cfg);
+
+    for (int i = 0; i < 1000; ++i) {
+        int *val = arena_alloc(sizeof(int), &arena);
+        if (val) {
+            *val = i;
+            fq_thread_pool_submit_fn(pool, my_task, val);
+        }
+    }
+
+    fq_thread_pool_wait_idle(pool);
+    fq_thread_pool_shutdown(pool);
+    return 0;
+}
+```
+
+## API Reference
+
+```c
+typedef struct fq_allocator_t {
+    void *(*alloc)(size_t size, void *context);
+    void  (*free)(void *ptr, void *context);
+    void *(*calloc)(size_t count, size_t size, void *context);
+    void *(*realloc)(void *ptr, size_t new_size, void *context);
+    void *context;
+} fq_allocator_t;
+
+const fq_allocator_t *fq_default_allocator(void);
 ```

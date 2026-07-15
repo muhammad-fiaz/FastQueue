@@ -1,43 +1,129 @@
+---
+title: Futures
+description: Learn how to use FastQueue futures for awaitable task results with spin-then-wait strategy.
+keywords: futures, awaitable, task result, fq_future, promise
+---
+
 # Futures
 
-Futures allow you to await the result of an asynchronous operation.
+Futures allow you to wait for task completion and retrieve results.
 
 ## Basic Usage
 
 ```c
-// Create a task
-fq_task_t *task = NULL;
-fq_task_create(&task, compute_square, &value, NULL);
+#include <fastqueue/fastqueue.h>
+#include <stdio.h>
 
-// Submit and get a future
-fq_future_t *future = NULL;
-fq_scheduler_submit_with_future(scheduler, task, &future);
+static void compute(void *arg)
+{
+    long *result = (long *)arg;
+    long sum = 0;
+    for (long i = 0; i < 1000000; ++i) sum += i;
+    *result = sum;
+}
 
-// Wait for result
-fq_status_t status = fq_future_wait(future);
-if (fq_status_ok(status)) {
-    printf("Result ready\n");
+int main(void)
+{
+    fq_scheduler_t *scheduler = NULL;
+    fq_scheduler_config_t cfg;
+    fq_scheduler_config_default(&cfg);
+    cfg.thread_count = 4;
+    fq_scheduler_create(&scheduler, &cfg);
+
+    long result = 0;
+    fq_future_t *future = NULL;
+    fq_task_t *task = NULL;
+
+    fq_task_create(&task, compute, &result, NULL);
+    fq_scheduler_submit_with_future(scheduler, task, &future);
+
+    fq_future_wait(future);
+    printf("Result: %ld\n", result);
+
+    fq_future_destroy(future);
+    fq_scheduler_shutdown(scheduler);
+    return 0;
+}
+```
+
+## API Reference
+
+### Creation
+
+```c
+fq_status_t fq_future_create(fq_future_t **future, const fq_allocator_t *allocator);
+void fq_future_destroy(fq_future_t *future);
+```
+
+### Waiting
+
+```c
+void fq_future_wait(fq_future_t *future);
+fq_status_t fq_future_wait_timeout(fq_future_t *future, unsigned timeout_ms);
+fq_bool_t fq_future_is_ready(const fq_future_t *future);
+```
+
+### Error Handling
+
+```c
+fq_status_t fq_future_status(const fq_future_t *future);
+fq_status_t fq_future_error(const fq_future_t *future);
+```
+
+## Multiple Futures
+
+```c
+#include <fastqueue/fastqueue.h>
+#include <stdio.h>
+
+static void compute(void *arg)
+{
+    long *result = (long *)arg;
+    *result = (*result) * (*result);
+}
+
+int main(void)
+{
+    fq_scheduler_t *scheduler = NULL;
+    fq_scheduler_config_t cfg;
+    fq_scheduler_config_default(&cfg);
+    cfg.thread_count = 4;
+    fq_scheduler_create(&scheduler, &cfg);
+
+    long results[5] = {1, 2, 3, 4, 5};
+    fq_future_t *futures[5];
+
+    for (int i = 0; i < 5; ++i) {
+        fq_task_t *task = NULL;
+        fq_task_create(&task, compute, &results[i], NULL);
+        fq_scheduler_submit_with_future(scheduler, task, &futures[i]);
+    }
+
+    for (int i = 0; i < 5; ++i) {
+        fq_future_wait(futures[i]);
+        printf("Result %d: %ld\n", i, results[i]);
+        fq_future_destroy(futures[i]);
+    }
+
+    fq_scheduler_shutdown(scheduler);
+    return 0;
 }
 ```
 
 ## Timeout
 
 ```c
-fq_status_t status;
-if (fq_future_wait_timeout(future, 1000, &status) == FQ_ERR_TIMEOUT) {
-    printf("Timed out after 1 second\n");
+fq_future_t *future = NULL;
+fq_task_t *task = NULL;
+fq_task_create(&task, slow_task, NULL, NULL);
+fq_scheduler_submit_with_future(scheduler, task, &future);
+
+fq_status_t st = fq_future_wait_timeout(future, 5000); // 5 second timeout
+if (st == FQ_OK) {
+    printf("Task completed\n");
+} else {
+    printf("Timeout or error\n");
 }
-```
 
-## Completion Callback
-
-```c
-fq_future_on_complete(future, on_done, user_data);
-```
-
-## Cancellation
-
-```c
-fq_future_cancel(future);
-// Future is now ready with FQ_ERR_CANCELED status
+fq_future_destroy(future);
 ```

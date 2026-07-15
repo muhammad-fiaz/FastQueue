@@ -1,29 +1,71 @@
+---
+title: Config API
+description: FastQueue configuration constants and build options reference.
+keywords: config, configuration, constants, build options
+---
+
 # Config API
 
-Header: `<fastqueue/config.h>`
+Build-time configuration constants.
 
-## Compile-Time Options
+## Constants
 
-All options can be overridden via `-D` compiler flags.
+```c
+// Default thread count (auto-detect)
+FQ_DEFAULT_THREADS
 
-| Macro | Default | Description |
-|---|---|---|
-| `FQ_MAX_THREADS` | 256 | Maximum worker threads |
-| `FQ_DEFAULT_THREADS` | 0 (auto) | Default thread count |
-| `FQ_QUEUE_MIN_CAPACITY` | 64 | Minimum queue capacity |
-| `FQ_QUEUE_DEFAULT_CAPACITY` | 1024 | Default queue capacity |
-| `FQ_QUEUE_MAX_CAPACITY` | 16M | Maximum queue capacity |
-| `FQ_FUTURE_SPIN_COUNT` | 128 | Spin iterations before wait |
-| `FQ_SHUTDOWN_TIMEOUT_MS` | 5000 | Default shutdown timeout |
-| `FQ_CACHE_LINE_SIZE` | 64 | Cache line padding size |
-| `FQ_DEFAULT_LOG_LEVEL` | INFO (debug) / WARN (release) | Minimum log level |
+// Default log level
+FQ_DEFAULT_LOG_LEVEL
+
+// Queue defaults
+FQ_QUEUE_DEFAULT_CAPACITY
+FQ_QUEUE_MIN_CAPACITY
+FQ_QUEUE_MAX_CAPACITY
+
+// Thread limits
+FQ_MAX_THREADS
+```
+
+## Memory Order
+
+```c
+FQ_MEMORY_ORDER_RELAXED
+FQ_MEMORY_ORDER_ACQUIRE
+FQ_MEMORY_ORDER_RELEASE
+FQ_MEMORY_ORDER_ACQ_REL
+FQ_MEMORY_ORDER_SEQ_CST
+```
 
 ## Log Levels
 
-| Level | Value | Description |
-|---|---|---|
-| `FQ_LOG_LEVEL_NONE` | 0 | No logging |
-| `FQ_LOG_LEVEL_ERROR` | 1 | Errors only |
-| `FQ_LOG_LEVEL_WARN` | 2 | Warnings and errors |
-| `FQ_LOG_LEVEL_INFO` | 3 | Info, warnings, errors |
-| `FQ_LOG_LEVEL_DEBUG` | 4 | All messages |
+```c
+typedef enum fq_log_level_t {
+    FQ_LOG_NONE   = 0,
+    FQ_LOG_ERROR  = 1,
+    FQ_LOG_WARN   = 2,
+    FQ_LOG_INFO   = 3,
+    FQ_LOG_DEBUG  = 4,
+    FQ_LOG_TRACE  = 5
+} fq_log_level_t;
+```
+
+## Log Callback
+
+```c
+typedef void (*fq_log_fn)(fq_log_level_t level, const char *message, void *context);
+```
+
+## Example
+
+```c
+void my_logger(fq_log_level_t level, const char *msg, void *ctx)
+{
+    printf("[%d] %s\n", level, msg);
+}
+
+fq_scheduler_config_t cfg;
+fq_scheduler_config_default(&cfg);
+cfg.log_callback = my_logger;
+cfg.log_level    = FQ_LOG_DEBUG;
+cfg.log_context  = NULL;
+```

@@ -1,33 +1,104 @@
-# FAQ
+---
+title: FAQ
+description: Frequently asked questions about FastQueue thread pool and job system library.
+keywords: faq, frequently asked questions, help, support
+---
 
-## What C standard is required?
+# Frequently Asked Questions
 
-FastQueue is written in **ISO C23**. You need GCC 14+, Clang 18+, or MSVC 2022+.
+## General
 
-## Can I use it from C++?
+### What is FastQueue?
 
-Yes. All public headers include `extern "C"` guards and are compatible with C++17 and later.
+FastQueue is a production-ready, high-performance C23 job system and thread pool library. It provides work-stealing thread pools, MPMC queues, futures, and custom allocator support.
 
-## Is it thread-safe?
+### What language is it written in?
 
-Yes. All public API functions are thread-safe unless documented otherwise.
+FastQueue is written in ISO C23, making it compatible with C2Y/C26 and C++ compilers.
 
-## What platforms are supported?
+### What platforms are supported?
 
-Linux, Windows, and macOS. POSIX threads are used on Linux/macOS; Win32 threads on Windows.
+- Linux (GCC, Clang)
+- Windows (MSVC 2022+)
+- macOS (Clang)
 
-## Can I use a custom allocator?
+### Is it header-only?
 
-Yes. See the [Memory Management](/guide/memory) guide.
+No. FastQueue is a compiled library. You link against `fastqueue.lib` (or `libfastqueue.a` on Linux/macOS).
 
-## How do I enable work stealing?
+## Usage
 
-It is enabled by default. To disable it, set `enable_work_stealing = FQ_FALSE` in the scheduler config.
+### How many threads should I use?
 
-## Can I cancel pending tasks?
+For CPU-bound tasks, use the number of physical CPU cores:
+```c
+cfg.thread_count = 0; // Auto-detect hardware concurrency
+```
 
-Yes. Call `fq_scheduler_cancel_all()` to cancel all pending tasks.
+For I/O-bound tasks, you can use more threads:
+```c
+cfg.thread_count = 16;
+```
 
-## What is the maximum number of threads?
+### How do I cancel all tasks?
 
-`FQ_MAX_THREADS` (default 256). Override via compiler define.
+```c
+fq_scheduler_cancel_all(scheduler);
+```
+
+### Can I use it from C++?
+
+Yes. All headers have `extern "C"` guards:
+```cpp
+#include <fastqueue/fastqueue.h>
+// Works directly in C++
+```
+
+### How do I handle errors?
+
+All functions return `fq_status_t`:
+```c
+fq_status_t st = fq_thread_pool_submit_fn(pool, my_task, NULL);
+if (st != FQ_OK) {
+    fprintf(stderr, "Error: %s\n", fq_error_string(st));
+}
+```
+
+## Building
+
+### CMake minimum version?
+
+CMake 3.20 or newer.
+
+### Compiler requirements?
+
+- GCC 14+
+- Clang 18+
+- MSVC 2022+ (19.40+)
+
+### Can I build as shared library?
+
+Yes:
+```bash
+cmake -B build -DFQ_SHARED=ON
+```
+
+### How do I enable sanitizers?
+
+```bash
+cmake -B build -DFQ_ENABLE_ASAN=ON -DFQ_ENABLE_UBSAN=ON
+```
+
+## Performance
+
+### Is it lock-free?
+
+The queue uses mutex protection for MPMC safety. The scheduler uses lock-free atomic operations for task counting.
+
+### What's the maximum throughput?
+
+Benchmarked at ~2M jobs/sec on a 4-core system with trivial tasks.
+
+### How does work stealing work?
+
+When a worker's local queue is empty, it tries to steal tasks from other workers' queues. This ensures all cores stay busy.
