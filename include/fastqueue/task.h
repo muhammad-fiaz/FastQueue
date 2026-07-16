@@ -113,6 +113,17 @@ fq_bool_t fq_task_is_executed(const fq_task_t *task);
  */
 fq_bool_t fq_task_is_canceled(const fq_task_t *task);
 
+/**
+ * @brief Cancel a task.
+ *
+ * If the task has a future, the future is also canceled.
+ * The task's callback will not be invoked if it hasn't started yet.
+ *
+ * @param task Task to cancel.
+ * @return ::FQ_OK on success, ::FQ_ERR_BUSY if already executing.
+ */
+fq_status_t fq_task_cancel(fq_task_t *task);
+
 #ifdef __cplusplus
 }
 #endif

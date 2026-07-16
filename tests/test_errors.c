@@ -38,15 +38,18 @@ int test_errors(void)
     s = fq_status_string(FQ_ERR_INTERNAL);
     if (!s || strcmp(s, "internal error") != 0) return 9;
 
+    s = fq_status_string(FQ_ERR_NOSUPPORT);
+    if (!s || strcmp(s, "not supported") != 0) return 10;
+
     /* fq_status_ok. */
-    if (!fq_status_ok(FQ_OK)) return 10;
-    if (fq_status_ok(FQ_ERR_NOMEM)) return 11;
+    if (!fq_status_ok(FQ_OK)) return 11;
+    if (fq_status_ok(FQ_ERR_NOMEM)) return 12;
 
     /* Thread-local error. */
     fq_set_error("test error %d", 42);
     const char *err = fq_last_error();
-    if (!err) return 12;
-    if (strstr(err, "42") == NULL) return 13;
+    if (!err) return 13;
+    if (strstr(err, "42") == NULL) return 14;
 
     return 0;
 }

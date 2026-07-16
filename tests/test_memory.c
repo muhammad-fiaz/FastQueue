@@ -50,8 +50,10 @@ int test_memory_alloc(void)
     /* Statistics. */
     fq_mem_stats_t stats;
     fq_mem_stats(&stats);
-    /* Just verify it doesn't crash. */
-    (void)stats;
+
+    /* Verify stats are reasonable. */
+    if (stats.peak_bytes == 0 && stats.total_allocs > 0) return 12;
+    if (stats.total_allocs > 0 && stats.total_frees > stats.total_allocs) return 13;
 
     return 0;
 }

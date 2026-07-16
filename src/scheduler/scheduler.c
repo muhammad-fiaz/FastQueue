@@ -16,6 +16,7 @@
 #include "fastqueue/atomic.h"
 #include "fastqueue/config.h"
 #include "fastqueue/platform.h"
+#include "fastqueue/time.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -47,6 +48,10 @@ struct fq_scheduler_t {
     fq_atomic_int_t        tasks_canceled;
     fq_atomic_int_t        tasks_pending;
     fq_atomic_int_t        tasks_active;
+    fq_bool_t              enable_work_stealing;
+    fq_bool_t              enable_priority;
+    uint64_t               total_wait_ns;
+    uint64_t               total_work_ns;
     const fq_allocator_t  *allocator;
     fq_log_fn              log_callback;
     void                  *log_context;
@@ -94,12 +99,23 @@ static int worker_main(void *arg)
         fq_task_t *task = NULL;
         fq_bool_t found = FQ_FALSE;
 
-        if (fq_queue_try_pop(w->queue, &task) == FQ_OK) {
-            found = FQ_TRUE;
-        } else if (try_steal(s, w, &task)) {
-            found = FQ_TRUE;
-        } else if (fq_queue_try_pop(s->global_queue, &task) == FQ_OK) {
-            found = FQ_TRUE;
+        /* When priority is enabled, check global queue first. */
+        if (s->enable_priority) {
+            if (fq_queue_try_pop(s->global_queue, &task) == FQ_OK) {
+                found = FQ_TRUE;
+            } else if (fq_queue_try_pop(w->queue, &task) == FQ_OK) {
+                found = FQ_TRUE;
+            } else if (s->enable_work_stealing && try_steal(s, w, &task)) {
+                found = FQ_TRUE;
+            }
+        } else {
+            if (fq_queue_try_pop(w->queue, &task) == FQ_OK) {
+                found = FQ_TRUE;
+            } else if (s->enable_work_stealing && try_steal(s, w, &task)) {
+                found = FQ_TRUE;
+            } else if (fq_queue_try_pop(s->global_queue, &task) == FQ_OK) {
+                found = FQ_TRUE;
+            }
         }
 
         if (found && task) {
@@ -109,17 +125,24 @@ static int worker_main(void *arg)
             fq_atomic_fetch_sub_explicit(&s->tasks_pending, 1,
                                          FQ_MEMORY_ORDER_RELEASE);
 
+            int64_t start = fq_time_now_ns();
             fq_task_execute(task);
-
-            fq_task_destroy(task);
+            int64_t end = fq_time_now_ns();
 
             fq_atomic_fetch_add_explicit(&s->tasks_completed, 1,
                                          FQ_MEMORY_ORDER_RELEASE);
             fq_atomic_fetch_sub_explicit(&s->tasks_active, 1,
                                          FQ_MEMORY_ORDER_RELEASE);
+
+            /* Accumulate work time (unsigned wraparound is fine). */
+            s->total_work_ns += (uint64_t)(end - start);
+
+            fq_task_destroy(task);
         } else {
             fq_atomic_fetch_add_explicit(&s->idle_count, 1,
                                          FQ_MEMORY_ORDER_RELAXED);
+
+            int64_t wait_start = fq_time_now_ns();
 
             fq_mutex_lock(&s->submit_mutex);
             if (fq_queue_empty(s->global_queue) && fq_queue_empty(w->queue)) {
@@ -129,6 +152,9 @@ static int worker_main(void *arg)
                 if (idle_backoff < 6) idle_backoff++;
             }
             fq_mutex_unlock(&s->submit_mutex);
+
+            int64_t wait_end = fq_time_now_ns();
+            s->total_wait_ns += (uint64_t)(wait_end - wait_start);
 
             fq_atomic_fetch_sub_explicit(&s->idle_count, 1,
                                          FQ_MEMORY_ORDER_RELAXED);
@@ -180,6 +206,10 @@ fq_status_t fq_scheduler_create(fq_scheduler_t **scheduler,
     s->log_callback = cfg.log_callback;
     s->log_context  = cfg.log_context;
     s->log_level    = cfg.log_level;
+    s->enable_work_stealing = cfg.enable_work_stealing;
+    s->enable_priority      = cfg.enable_priority;
+    s->total_wait_ns = 0;
+    s->total_work_ns = 0;
 
     fq_atomic_store_explicit(&s->shutdown_flag, 0, FQ_MEMORY_ORDER_RELAXED);
 
@@ -323,13 +353,21 @@ fq_status_t fq_scheduler_submit(fq_scheduler_t *scheduler, fq_task_t *task)
     fq_atomic_fetch_add_explicit(&scheduler->tasks_pending, 1,
                                  FQ_MEMORY_ORDER_RELEASE);
 
-    static _Thread_local unsigned tls_next_worker = 0;
-    unsigned idx = tls_next_worker % scheduler->worker_count;
-    tls_next_worker++;
+    fq_status_t st;
 
-    fq_status_t st = fq_queue_push(scheduler->workers[idx].queue, task);
-    if (st != FQ_OK) {
+    /* When priority is enabled, high/urgent tasks go to global queue. */
+    if (scheduler->enable_priority &&
+        fq_task_priority(task) >= FQ_PRIORITY_HIGH) {
         st = fq_queue_push(scheduler->global_queue, task);
+    } else {
+        static _Thread_local unsigned tls_next_worker = 0;
+        unsigned idx = tls_next_worker % scheduler->worker_count;
+        tls_next_worker++;
+
+        st = fq_queue_push(scheduler->workers[idx].queue, task);
+        if (st != FQ_OK) {
+            st = fq_queue_push(scheduler->global_queue, task);
+        }
     }
 
     if (st == FQ_OK) {
@@ -388,6 +426,7 @@ void fq_scheduler_wait_idle(fq_scheduler_t *scheduler)
         fq_bool_t idle = fq_scheduler_is_idle(scheduler);
         if (idle) break;
         fq_thread_yield();
+        fq_thread_sleep_ms(0);
     }
 }
 
@@ -449,4 +488,6 @@ void fq_scheduler_stats(const fq_scheduler_t *scheduler,
     stats->tasks_active = (size_t)(unsigned)fq_atomic_load_explicit(
         &((fq_scheduler_t *)scheduler)->tasks_active,
         FQ_MEMORY_ORDER_RELAXED);
+    stats->total_wait_ns = scheduler->total_wait_ns;
+    stats->total_work_ns = scheduler->total_work_ns;
 }

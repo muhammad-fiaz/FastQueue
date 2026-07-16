@@ -1,6 +1,6 @@
 /**
  * @file examples/parallel_for.c
- * @brief Example: parallel loop over a range.
+ * @brief Example: parallel loop over a range using fq_thread_pool_parallel_for.
  */
 
 #include "fastqueue/fastqueue.h"
@@ -11,14 +11,10 @@
 
 static double g_array[N];
 
-static void square_range(void *arg)
+static void square_index(long index, void *ctx)
 {
-    uintptr_t range_id = (uintptr_t)arg;
-    size_t start = (range_id * N) / 4;
-    size_t end   = ((range_id + 1) * N) / 4;
-    for (size_t i = start; i < end; ++i) {
-        g_array[i] = g_array[i] * g_array[i];
-    }
+    (void)ctx;
+    g_array[index] = g_array[index] * g_array[index];
 }
 
 int main(void)
@@ -34,15 +30,18 @@ int main(void)
         return 1;
     }
 
-    /* Split into 4 chunks. */
-    for (int i = 0; i < 4; ++i) {
-        fq_thread_pool_submit_fn(pool, square_range, (void *)(uintptr_t)i);
+    /* Use the built-in parallel_for API. */
+    fq_status_t st = fq_thread_pool_parallel_for(pool, 0, N, square_index, NULL);
+    if (st != FQ_OK) {
+        fprintf(stderr, "parallel_for failed: %s\n", fq_status_string(st));
+        fq_thread_pool_shutdown(pool);
+        return 1;
     }
 
-    fq_thread_pool_wait_idle(pool);
-
-    printf("g_array[0]     = %f\n", g_array[0]);
-    printf("g_array[999999] = %f\n", g_array[999999]);
+    printf("g_array[0]      = %f\n", g_array[0]);
+    printf("g_array[999999]  = %f\n", g_array[999999]);
+    printf("Expected[0]     = %f\n", 0.0 * 0.0);
+    printf("Expected[999999]= %f\n", 999999.0 * 999999.0);
 
     fq_thread_pool_shutdown(pool);
     return 0;

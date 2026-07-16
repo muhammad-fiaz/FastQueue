@@ -10,6 +10,8 @@ set(FQ_TEST_SOURCES
     test_scheduler.c
     test_memory.c
     test_errors.c
+    test_time.c
+    test_platform.c
 )
 
 add_executable(fq_tests ${FQ_TEST_SOURCES})

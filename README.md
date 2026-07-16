@@ -42,8 +42,8 @@
 |---------|-------------|---------------|
 | **Thread Pool** | Built-in work-stealing thread pool with configurable worker count and automatic load balancing. | https://muhammad-fiaz.github.io/FastQueue/api/thread_pool |
 | **Job Scheduler** | Low-level scheduler with priority support, work stealing, and statistics tracking. | https://muhammad-fiaz.github.io/FastQueue/api/scheduler |
-| **MPMC Queue** | Thread-safe multi-producer multi-consumer queue with mutex-protected push/pop operations. | https://muhammad-fiaz.github.io/FastQueue/api/queue |
-| **Futures** | Awaitable results with spin-then-wait strategy for low-latency task completion. | https://muhammad-fiaz.github.io/FastQueue/api/future |
+| **MPMC Queue** | Thread-safe multi-producer multi-consumer queue with mutex-protected push/pop/try_pop operations. | https://muhammad-fiaz.github.io/FastQueue/api/queue |
+| **Futures** | Awaitable results with spin-then-wait strategy and completion callbacks. | https://muhammad-fiaz.github.io/FastQueue/api/future |
 | **Parallel For** | Built-in parallel for-loop that distributes work across worker threads. | https://muhammad-fiaz.github.io/FastQueue/api/parallel |
 | **Time Utilities** | High-resolution timer and monotonic clock for performance measurement. | https://muhammad-fiaz.github.io/FastQueue/api/time |
 | **Custom Allocators** | Pluggable allocator interface for memory-constrained and embedded environments. | https://muhammad-fiaz.github.io/FastQueue/guide/memory |
@@ -51,7 +51,9 @@
 | **C99/C11/C17/C23** | Compatible with all modern C standards. C++ ready with `extern "C"` guards. | https://muhammad-fiaz.github.io/FastQueue/guide/installation |
 | **C++ Compatible** | All headers have `extern "C"` guards for direct use in C++ projects. | https://muhammad-fiaz.github.io/FastQueue/api/overview |
 | **Zero Dependencies** | Uses only the C standard library and platform APIs. | https://muhammad-fiaz.github.io/FastQueue/guide/installation |
-| **Work Stealing** | Idle workers automatically steal tasks from busy workers for optimal utilization. | https://muhammad-fiaz.github.io/FastQueue/guide/scheduler |
+| **Work Stealing** | Configurable work-stealing: idle workers steal from busy workers, or disable for pinned assignment. | https://muhammad-fiaz.github.io/FastQueue/guide/scheduler |
+| **Priority Scheduling** | High/urgent priority tasks routed to global queue for fastest pickup. | https://muhammad-fiaz.github.io/FastQueue/api/scheduler |
+| **Task Cancellation** | Cancel pending tasks before execution; futures auto-cancel on task destroy. | https://muhammad-fiaz.github.io/FastQueue/api/task |
 | **Sanitizer Support** | Built-in support for AddressSanitizer, UBSan, and ThreadSanitizer. | https://muhammad-fiaz.github.io/FastQueue/guide/installation |
 | **Package Managers** | Supports CMake, xmake, Conan, and vcpkg package managers. | https://muhammad-fiaz.github.io/FastQueue/guide/installation |
 
@@ -287,7 +289,7 @@ Average throughput across multiple runs:
 
 ## Testing
 
-Run the full test suite:
+Run the full test suite (38 tests):
 ```bash
 cmake -B build -DFQ_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Debug
 cmake --build build --config Debug

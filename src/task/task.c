@@ -119,6 +119,28 @@ fq_bool_t fq_task_is_canceled(const fq_task_t *task)
                    : FQ_FALSE;
 }
 
+fq_status_t fq_task_cancel(fq_task_t *task)
+{
+    if (!task) return FQ_ERR_INVAL;
+
+    /* If already executing, cannot cancel. */
+    if (fq_task_is_executed(task)) return FQ_ERR_BUSY;
+
+    int expected = 0;
+    if (!fq_atomic_compare_exchange_strong_explicit(
+            &task->canceled, &expected, 1,
+            FQ_MEMORY_ORDER_ACQ_REL, FQ_MEMORY_ORDER_RELAXED)) {
+        return FQ_OK; /* already canceled */
+    }
+
+    /* Cancel the future if attached. */
+    if (task->future) {
+        fq_future_cancel(task->future);
+    }
+
+    return FQ_OK;
+}
+
  
 
 /**

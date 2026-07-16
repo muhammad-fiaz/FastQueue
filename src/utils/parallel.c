@@ -9,8 +9,6 @@
 
 #include <string.h>
 
-enum { FQ_PARALLEL_MAX_STACK = 16 };
-
 typedef struct {
     fq_parallel_for_fn fn;
     void              *ctx;
@@ -47,16 +45,6 @@ fq_status_t fq_scheduler_parallel_for(fq_scheduler_t *scheduler,
     long chunk = count / (long)threads;
     long remainder = count % (long)threads;
 
-    fq_bool_t use_stack = (threads <= FQ_PARALLEL_MAX_STACK);
-    fq_parallel_range_t stack_ranges[FQ_PARALLEL_MAX_STACK];
-    fq_parallel_range_t *ranges = use_stack ? stack_ranges : NULL;
-
-    if (!use_stack) {
-        ranges = (fq_parallel_range_t *)fq_alloc(
-            fq_default_allocator(), threads * sizeof(fq_parallel_range_t));
-        if (!ranges) return FQ_ERR_NOMEM;
-    }
-
     fq_status_t st = FQ_OK;
     long cur = begin;
 
@@ -64,7 +52,13 @@ fq_status_t fq_scheduler_parallel_for(fq_scheduler_t *scheduler,
         long chunk_end = cur + chunk + (long)(i < (unsigned)remainder ? 1 : 0);
         if (chunk_end > end) chunk_end = end;
 
-        fq_parallel_range_t *range = &ranges[i];
+        fq_parallel_range_t *range = (fq_parallel_range_t *)fq_alloc(
+            fq_default_allocator(), sizeof(fq_parallel_range_t));
+        if (!range) {
+            st = FQ_ERR_NOMEM;
+            break;
+        }
+
         range->fn    = fn;
         range->ctx   = ctx;
         range->begin = cur;
@@ -72,7 +66,7 @@ fq_status_t fq_scheduler_parallel_for(fq_scheduler_t *scheduler,
 
         st = fq_scheduler_submit_fn(scheduler, parallel_for_worker, range);
         if (st != FQ_OK) {
-            if (!use_stack) fq_free(fq_default_allocator(), ranges);
+            fq_free(fq_default_allocator(), range);
             break;
         }
         cur = chunk_end;
@@ -82,14 +76,13 @@ fq_status_t fq_scheduler_parallel_for(fq_scheduler_t *scheduler,
         fq_scheduler_wait_idle(scheduler);
     }
 
-    if (!use_stack) fq_free(fq_default_allocator(), ranges);
     return st;
 }
 
 fq_status_t fq_thread_pool_parallel_for(fq_thread_pool_t *pool,
-                                        long begin, long end,
-                                        fq_parallel_for_fn fn,
-                                        void *ctx)
+                                         long begin, long end,
+                                         fq_parallel_for_fn fn,
+                                         void *ctx)
 {
     return fq_scheduler_parallel_for((fq_scheduler_t *)pool,
                                      begin, end, fn, ctx);

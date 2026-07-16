@@ -141,7 +141,26 @@ fq_status_t fq_queue_pop(fq_queue_t *queue, fq_task_t **task)
 
 fq_status_t fq_queue_try_pop(fq_queue_t *queue, fq_task_t **task)
 {
-    return fq_queue_pop(queue, task);
+    if (!queue || !task) return FQ_ERR_INVAL;
+
+    if (fq_mutex_trylock(&queue->pop_lock) != 0) {
+        return FQ_ERR_BUSY;
+    }
+
+    int head = fq_atomic_load_explicit(&queue->head, FQ_MEMORY_ORDER_RELAXED);
+    int tail = fq_atomic_load_explicit(&queue->tail, FQ_MEMORY_ORDER_ACQUIRE);
+    if (head == tail) {
+        fq_mutex_unlock(&queue->pop_lock);
+        return FQ_ERR_BUSY;
+    }
+
+    *task = queue->buffer[(size_t)head];
+
+    fq_atomic_store_explicit(&queue->head,
+                             (head + 1) & (int)queue->mask,
+                             FQ_MEMORY_ORDER_RELEASE);
+    fq_mutex_unlock(&queue->pop_lock);
+    return FQ_OK;
 }
 
  
