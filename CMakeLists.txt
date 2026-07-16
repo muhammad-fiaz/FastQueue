@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.20)
 project(FastQueue
     VERSION 0.1.0
     DESCRIPTION "Production-ready, high-performance Job System & Thread Pool Library (C23)"
-    HOMEPAGE_URL "https://github.com/fastqueue/fastqueue"
+    HOMEPAGE_URL "https://github.com/muhammad-fiaz/FastQueue"
     LANGUAGES C
 )
 

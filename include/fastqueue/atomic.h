@@ -1,4 +1,14 @@
-﻿#ifndef FQ_ATOMIC_H
+﻿/**
+ * @file atomic.h
+ * @brief Portable atomic operations for FastQueue.
+ *
+ * @copyright SPDX-License-Identifier: MIT
+ * @author FastQueue Contributors
+ * @version 0.1.0
+ * @date 2026
+ */
+
+#ifndef FQ_ATOMIC_H
 #define FQ_ATOMIC_H
 
 #include "config.h"

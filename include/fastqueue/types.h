@@ -43,12 +43,6 @@ typedef enum fq_status_t {
  
 
 /**
- * @struct fq_system_t
- * @brief Opaque handle to a FastQueue system instance.
- */
-typedef struct fq_system_t fq_system_t;
-
-/**
  * @struct fq_task_t
  * @brief A unit of work submitted to the system.
  */

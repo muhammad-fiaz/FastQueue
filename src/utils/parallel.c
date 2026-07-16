@@ -19,8 +19,13 @@ typedef struct {
 static void parallel_for_worker(void *arg)
 {
     fq_parallel_range_t *range = (fq_parallel_range_t *)arg;
-    for (long i = range->begin; i < range->end; ++i) {
-        range->fn(i, range->ctx);
+    fq_parallel_for_fn fn = range->fn;
+    void *ctx = range->ctx;
+    long begin = range->begin;
+    long end = range->end;
+    fq_free(fq_default_allocator(), range);
+    for (long i = begin; i < end; ++i) {
+        fn(i, ctx);
     }
 }
 
