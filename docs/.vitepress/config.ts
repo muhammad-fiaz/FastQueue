@@ -87,6 +87,7 @@ export default defineConfig({
     ["link", { rel: "canonical", href: SITE_URL }],
 
     // Favicons
+    ["link", { rel: "icon", type: "image/svg+xml", href: "/FastQueue/favicon.svg" }],
     ["link", { rel: "icon", href: "/FastQueue/favicon.ico" }],
     [
       "link",
@@ -423,6 +424,8 @@ gtag('config', '${GA_ID}');`,
 
     socialLinks: [
       { icon: "github", link: "https://github.com/muhammad-fiaz/FastQueue" },
+      { icon: "linkedin", link: "https://www.linkedin.com/in/muhammad-fiaz-" },
+      { icon: "x", link: "https://x.com/muhammadfiaz_" },
     ],
 
     footer: {

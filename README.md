@@ -70,7 +70,7 @@ Before using `FastQueue`, ensure you have the following:
 
 | Requirement | Version | Notes |
 |-------------|---------|-------|
-| **C Compiler** | C23 (GCC 14+, Clang 18+, MSVC 2022+) | Must support ISO C23 |
+| **C Compiler** | C99 or later (GCC 4.8+, Clang 3.0+, MSVC 2015+) | Supports C99, C11, C17, C23 |
 | **CMake** | 3.20+ | Build system |
 | **pthreads** | Linux/macOS only | POSIX threads |
 | **Win32 API** | Windows only | Thread primitives |
