@@ -1,0 +1,3285 @@
+---
+url: /FastQueue/guide/getting-started.md
+description: >-
+  Learn how to install and set up FastQueue, a high-performance C23 thread pool
+  and job system library.
+---
+
+# Getting Started
+
+FastQueue is a production-ready, high-performance **Job System & Thread Pool Library** written in **ISO C23**.
+
+## Features
+
+* Thread pool with work stealing
+* Job scheduler with priority support
+* Thread-safe MPMC queues
+* Futures and promises
+* Custom allocators
+* Cross-platform (Linux, Windows, macOS)
+* Zero external dependencies
+
+## Requirements
+
+* C23-capable compiler (GCC 14+, Clang 18+, MSVC 2022+)
+* CMake 3.20+
+* POSIX threads (Linux/macOS) or Win32 threads (Windows)
+
+## Quick Install
+
+### From source
+
+```bash
+git clone https://github.com/muhammad-fiaz/FastQueue.git
+cd FastQueue
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+cmake --install build
+```
+
+### As a subdirectory
+
+```cmake
+add_subdirectory(FastQueue)
+target_link_libraries(your_target PRIVATE FastQueue::fastqueue)
+```
+
+### With FetchContent
+
+```cmake
+include(FetchContent)
+FetchContent_Declare(
+    FastQueue
+    GIT_REPOSITORY https://github.com/muhammad-fiaz/FastQueue.git
+    GIT_TAG main
+)
+FetchContent_MakeAvailable(FastQueue)
+target_link_libraries(your_target PRIVATE FastQueue::fastqueue)
+```
+
+### With xmake
+
+```bash
+xmake repo add fastqueue https://github.com/muhammad-fiaz/FastQueue
+xmake require fastqueue
+```
+
+### With Conan
+
+```ini
+[requires]
+fastqueue/0.1.0
+```
+
+### With vcpkg
+
+```bash
+vcpkg install fastqueue
+```
+
+## Next Steps
+
+* [Quick Start](/guide/quick-start) - Write your first program
+* [Thread Pool](/guide/thread-pool) - Learn about the thread pool
+* [API Reference](/api/overview) - Full API docs
+
+---
+
+---
+url: /FastQueue/guide/installation.md
+description: >-
+  Detailed installation guide for FastQueue across all platforms and package
+  managers.
+---
+
+# Installation
+
+FastQueue supports multiple installation methods across all platforms.
+
+## Requirements
+
+| Requirement | Minimum Version |
+|---|---|
+| C Compiler | C23 (GCC 14+, Clang 18+, MSVC 2022+) |
+| CMake | 3.20+ |
+| pthreads | Linux/macOS only |
+| Win32 API | Windows only |
+
+## Package Managers
+
+### CMake (FetchContent)
+
+```cmake
+include(FetchContent)
+FetchContent_Declare(
+    FastQueue
+    GIT_REPOSITORY https://github.com/muhammad-fiaz/FastQueue.git
+    GIT_TAG main
+)
+FetchContent_MakeAvailable(FastQueue)
+target_link_libraries(your_target PRIVATE FastQueue::fastqueue)
+```
+
+### CMake (subdirectory)
+
+```bash
+git clone https://github.com/muhammad-fiaz/FastQueue.git
+```
+
+```cmake
+add_subdirectory(FastQueue)
+target_link_libraries(your_target PRIVATE FastQueue::fastqueue)
+```
+
+### xmake
+
+```lua
+add_requires("fastqueue")
+target("myapp")
+    set_kind("binary")
+    add_files("src/main.c")
+    add_packages("fastqueue")
+```
+
+### Conan
+
+```ini
+[requires]
+fastqueue/0.1.0
+
+[generators]
+CMakeDeps
+CMakeToolchain
+```
+
+```bash
+conan install . --output-folder=build --build=missing
+cmake --preset conan-release
+```
+
+### vcpkg
+
+```bash
+vcpkg install fastqueue
+```
+
+## Building from Source
+
+```bash
+git clone https://github.com/muhammad-fiaz/FastQueue.git
+cd FastQueue
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+```
+
+### CMake Options
+
+| Option | Default | Description |
+|---|---|---|
+| `FQ_BUILD_TESTS` | OFF | Build unit tests |
+| `FQ_BUILD_EXAMPLES` | OFF | Build examples |
+| `FQ_BUILD_BENCHMARKS` | OFF | Build benchmarks |
+| `FQ_SHARED` | OFF | Build shared library |
+| `FQ_INSTALL` | ON | Generate install targets |
+| `FQ_ENABLE_ASAN` | OFF | AddressSanitizer |
+| `FQ_ENABLE_UBSAN` | OFF | UndefinedBehaviorSanitizer |
+| `FQ_ENABLE_TSAN` | OFF | ThreadSanitizer |
+
+### Example Build Commands
+
+```bash
+# Release build
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+
+# Debug build with tests and examples
+cmake -B build -DCMAKE_BUILD_TYPE=Debug -DFQ_BUILD_TESTS=ON -DFQ_BUILD_EXAMPLES=ON
+cmake --build build --config Debug
+
+# Run tests
+./build/tests/Release/fq_tests
+
+# Run benchmark
+./build/benchmarks/Release/fq_benchmark
+```
+
+## Platform-Specific Notes
+
+### Linux
+
+Requires pthreads (usually available by default):
+
+```bash
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+```
+
+### Windows (MSVC)
+
+```cmd
+cmake -B build -G "Visual Studio 17 2022" -A x64
+cmake --build build --config Release
+```
+
+### macOS
+
+```bash
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+```
+
+---
+
+---
+url: /FastQueue/guide/quick-start.md
+description: >-
+  Write your first FastQueue program in minutes. Learn thread pools, job
+  submission, and futures with complete C and C++ examples.
+---
+
+# Quick Start
+
+## Your First Thread Pool
+
+```c
+#include <fastqueue/fastqueue.h>
+#include <stdio.h>
+
+static void print_task(void *arg)
+{
+    int id = *(int *)arg;
+    printf("Task %d executed on thread\n", id);
+}
+
+int main(void)
+{
+    fq_thread_pool_t *pool = NULL;
+    fq_thread_pool_create_ex(&pool, 4);
+
+    for (int i = 0; i < 100; ++i) {
+        int *id = malloc(sizeof(int));
+        *id = i;
+        fq_thread_pool_submit_fn(pool, print_task, id);
+    }
+
+    fq_thread_pool_wait_idle(pool);
+    fq_thread_pool_shutdown(pool);
+    return 0;
+}
+```
+
+Compile with:
+
+```bash
+gcc -std=c23 -o myapp main.c -lfastqueue -lpthread
+```
+
+## Using the Scheduler
+
+```c
+#include <fastqueue/fastqueue.h>
+#include <stdio.h>
+
+static void compute(void *arg)
+{
+    int n = *(int *)arg;
+    long sum = 0;
+    for (int i = 0; i <= n; ++i) sum += i;
+    printf("Sum 1..%d = %ld\n", n, sum);
+}
+
+int main(void)
+{
+    fq_scheduler_t *scheduler = NULL;
+    fq_scheduler_config_t cfg;
+    fq_scheduler_config_default(&cfg);
+    cfg.thread_count = 4;
+
+    fq_scheduler_create(&scheduler, &cfg);
+
+    for (int i = 1; i <= 20; ++i) {
+        int *val = malloc(sizeof(int));
+        *val = i * 1000;
+        fq_scheduler_submit_fn(scheduler, compute, val);
+    }
+
+    fq_scheduler_wait_idle(scheduler);
+    fq_scheduler_shutdown(scheduler);
+    return 0;
+}
+```
+
+## Using Futures
+
+```c
+#include <fastqueue/fastqueue.h>
+#include <stdio.h>
+
+static void heavy_computation(void *arg)
+{
+    long *result = (long *)arg;
+    long sum = 0;
+    for (long i = 0; i < 1000000; ++i) sum += i;
+    *result = sum;
+}
+
+int main(void)
+{
+    fq_scheduler_t *scheduler = NULL;
+    fq_scheduler_config_t cfg;
+    fq_scheduler_config_default(&cfg);
+    cfg.thread_count = 4;
+    fq_scheduler_create(&scheduler, &cfg);
+
+    long result = 0;
+    fq_future_t *future = NULL;
+    fq_task_t *task = NULL;
+
+    fq_task_create(&task, heavy_computation, &result, NULL);
+    fq_scheduler_submit_with_future(scheduler, task, &future);
+
+    fq_future_wait(future);
+
+    printf("Result: %ld\n", result);
+
+    fq_future_destroy(future);
+    fq_scheduler_shutdown(scheduler);
+    return 0;
+}
+```
+
+## C++ Usage
+
+```cpp
+#include <fastqueue/fastqueue.h>
+#include <cstdio>
+#include <cstdlib>
+
+int main()
+{
+    fq_thread_pool_t *pool = nullptr;
+    fq_thread_pool_create_ex(&pool, 4);
+
+    auto task_fn = [](void *arg) {
+        int id = *static_cast<int *>(arg);
+        std::printf("Task %d executed\n", id);
+    };
+
+    for (int i = 0; i < 50; ++i) {
+        int *id = new int(i);
+        fq_thread_pool_submit_fn(pool, task_fn, id);
+    }
+
+    fq_thread_pool_wait_idle(pool);
+    fq_thread_pool_shutdown(pool);
+    return 0;
+}
+```
+
+## Thread Pool with Custom Allocator
+
+```c
+#include <fastqueue/fastqueue.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+static void *my_alloc(size_t size, void *ctx)
+{
+    (void)ctx;
+    return malloc(size);
+}
+
+static void my_free(void *ptr, void *ctx)
+{
+    (void)ctx;
+    free(ptr);
+}
+
+static void *my_realloc(void *ptr, size_t new_size, void *ctx)
+{
+    (void)ctx;
+    return realloc(ptr, new_size);
+}
+
+static void task_fn(void *arg)
+{
+    printf("Task with custom allocator: %d\n", *(int *)arg);
+}
+
+int main(void)
+{
+    fq_allocator_t alloc = { my_alloc, my_realloc, my_free, NULL };
+
+    fq_thread_pool_t *pool = NULL;
+    fq_thread_pool_create_ex(&pool, 4);
+
+    for (int i = 0; i < 10; ++i) {
+        int *val = malloc(sizeof(int));
+        *val = i;
+        fq_thread_pool_submit_fn(pool, task_fn, val);
+    }
+
+    fq_thread_pool_wait_idle(pool);
+    fq_thread_pool_shutdown(pool);
+    return 0;
+}
+```
+
+## Next Steps
+
+* [Thread Pool](/guide/thread-pool) - Deep dive into thread pool configuration
+* [Scheduler](/guide/scheduler) - Priority scheduling and work stealing
+* [Futures](/guide/futures) - Awaitable results
+* [API Reference](/api/overview) - Complete API documentation
+
+---
+
+---
+url: /FastQueue/guide/thread-pool.md
+description: >-
+  Learn how to configure and use the FastQueue thread pool with work stealing,
+  task submission, and lifecycle management.
+---
+
+# Thread Pool
+
+The thread pool is the primary interface for submitting and executing tasks concurrently.
+
+## Basic Usage
+
+```c
+#include <fastqueue/fastqueue.h>
+#include <stdio.h>
+
+static void worker(void *arg)
+{
+    int id = *(int *)arg;
+    printf("Worker task %d\n", id);
+}
+
+int main(void)
+{
+    fq_thread_pool_t *pool = NULL;
+    fq_thread_pool_create_ex(&pool, 4);
+
+    for (int i = 0; i < 100; ++i) {
+        int *id = malloc(sizeof(int));
+        *id = i;
+        fq_thread_pool_submit_fn(pool, worker, id);
+    }
+
+    fq_thread_pool_wait_idle(pool);
+    fq_thread_pool_shutdown(pool);
+    return 0;
+}
+```
+
+## Configuration
+
+```c
+fq_scheduler_config_t cfg;
+fq_scheduler_config_default(&cfg);
+
+cfg.thread_count       = 8;     // Number of worker threads
+cfg.queue_capacity     = 4096;  // Task queue capacity
+cfg.enable_work_stealing = FQ_TRUE;  // Enable work stealing
+
+fq_thread_pool_t *pool = NULL;
+fq_thread_pool_create_configured(&pool, &cfg);
+```
+
+## API Reference
+
+### Creation
+
+```c
+// Create with default settings
+fq_status_t fq_thread_pool_create(fq_thread_pool_t **pool);
+
+// Create with specific thread count
+fq_status_t fq_thread_pool_create_ex(fq_thread_pool_t **pool, unsigned thread_count);
+
+// Create with full configuration
+fq_status_t fq_thread_pool_create_configured(
+    fq_thread_pool_t **pool,
+    const fq_scheduler_config_t *config
+);
+```
+
+### Task Submission
+
+```c
+// Submit a function pointer
+fq_status_t fq_thread_pool_submit_fn(
+    fq_thread_pool_t *pool,
+    fq_task_fn fn,
+    void *user_data
+);
+
+// Submit a pre-built task
+fq_status_t fq_thread_pool_submit(fq_thread_pool_t *pool, fq_task_t *task);
+
+// Submit with future
+fq_status_t fq_thread_pool_submit_with_future(
+    fq_thread_pool_t *pool,
+    fq_task_t *task,
+    fq_future_t **future
+);
+```
+
+### Lifecycle
+
+```c
+// Wait for all tasks to complete
+void fq_thread_pool_wait_idle(fq_thread_pool_t *pool);
+
+// Check if idle
+fq_bool_t fq_thread_pool_is_idle(const fq_thread_pool_t *pool);
+
+// Get thread count
+unsigned fq_thread_pool_size(const fq_thread_pool_t *pool);
+
+// Shutdown and cleanup
+fq_status_t fq_thread_pool_shutdown(fq_thread_pool_t *pool);
+```
+
+## C++ Example
+
+```cpp
+#include <fastqueue/fastqueue.h>
+#include <cstdio>
+#include <vector>
+
+int main()
+{
+    fq_thread_pool_t *pool = nullptr;
+    fq_thread_pool_create_ex(&pool, 4);
+
+    std::vector<int> data(1000);
+    for (int i = 0; i < 1000; ++i) data[i] = i;
+
+    auto process = [](void *arg) {
+        int *val = static_cast<int *>(arg);
+        *val = (*val) * (*val);
+    };
+
+    for (auto &val : data) {
+        fq_thread_pool_submit_fn(pool, process, &val);
+    }
+
+    fq_thread_pool_wait_idle(pool);
+    fq_thread_pool_shutdown(pool);
+
+    printf("First: %d, Last: %d\n", data[0], data[999]);
+    return 0;
+}
+```
+
+## Error Handling
+
+```c
+fq_thread_pool_t *pool = NULL;
+fq_status_t st = fq_thread_pool_create_ex(&pool, 4);
+
+if (st != FQ_OK) {
+    fprintf(stderr, "Failed to create pool: %s\n", fq_status_string(st));
+    return 1;
+}
+
+st = fq_thread_pool_submit_fn(pool, my_task, NULL);
+if (st != FQ_OK) {
+    fprintf(stderr, "Submit failed: %s\n", fq_status_string(st));
+}
+
+fq_thread_pool_shutdown(pool);
+```
+
+---
+
+---
+url: /FastQueue/guide/scheduler.md
+description: >-
+  Learn about the FastQueue job scheduler with work stealing, priority support,
+  and statistics.
+---
+
+# Scheduler
+
+The scheduler is the low-level engine behind the thread pool, providing fine-grained control over task execution.
+
+## Basic Usage
+
+```c
+#include <fastqueue/fastqueue.h>
+#include <stdio.h>
+
+static void job(void *arg)
+{
+    printf("Job %d executed\n", *(int *)arg);
+}
+
+int main(void)
+{
+    fq_scheduler_t *scheduler = NULL;
+    fq_scheduler_config_t cfg;
+    fq_scheduler_config_default(&cfg);
+    cfg.thread_count = 4;
+
+    fq_scheduler_create(&scheduler, &cfg);
+
+    for (int i = 0; i < 100; ++i) {
+        int *val = malloc(sizeof(int));
+        *val = i;
+        fq_scheduler_submit_fn(scheduler, job, val);
+    }
+
+    fq_scheduler_wait_idle(scheduler);
+    fq_scheduler_shutdown(scheduler);
+    return 0;
+}
+```
+
+## Configuration
+
+```c
+fq_scheduler_config_t cfg;
+fq_scheduler_config_default(&cfg);
+
+cfg.thread_count         = 8;
+cfg.queue_capacity       = 8192;
+cfg.enable_work_stealing = FQ_TRUE;
+cfg.enable_priority      = FQ_FALSE;
+cfg.log_level            = FQ_LOG_INFO;
+cfg.log_callback         = my_log_fn;
+cfg.log_context          = NULL;
+cfg.allocator            = &my_allocator;
+```
+
+## API Reference
+
+### Configuration
+
+```c
+void fq_scheduler_config_default(fq_scheduler_config_t *config);
+```
+
+### Creation / Destruction
+
+```c
+fq_status_t fq_scheduler_create(
+    fq_scheduler_t **scheduler,
+    const fq_scheduler_config_t *config
+);
+
+fq_status_t fq_scheduler_shutdown(fq_scheduler_t *scheduler);
+```
+
+### Task Submission
+
+```c
+fq_status_t fq_scheduler_submit(fq_scheduler_t *scheduler, fq_task_t *task);
+
+fq_status_t fq_scheduler_submit_fn(
+    fq_scheduler_t *scheduler,
+    fq_task_fn fn,
+    void *user_data
+);
+
+fq_status_t fq_scheduler_submit_with_future(
+    fq_scheduler_t *scheduler,
+    fq_task_t *task,
+    fq_future_t **future
+);
+```
+
+### Lifecycle
+
+```c
+void fq_scheduler_wait_idle(fq_scheduler_t *scheduler);
+fq_bool_t fq_scheduler_is_idle(const fq_scheduler_t *scheduler);
+fq_bool_t fq_scheduler_is_shutdown(const fq_scheduler_t *scheduler);
+void fq_scheduler_cancel_all(fq_scheduler_t *scheduler);
+```
+
+### Statistics
+
+```c
+void fq_scheduler_stats(const fq_scheduler_t *scheduler, fq_scheduler_stats_t *stats);
+```
+
+The `fq_scheduler_stats_t` struct contains:
+
+* `thread_count` - Number of worker threads
+* `tasks_submitted` - Total tasks submitted
+* `tasks_completed` - Total tasks completed
+* `tasks_canceled` - Total tasks canceled
+* `tasks_pending` - Currently pending tasks
+* `tasks_active` - Currently executing tasks
+* `total_wait_ns` - Cumulative wait time in nanoseconds
+* `total_work_ns` - Cumulative work time in nanoseconds
+
+## Work Stealing
+
+When `enable_work_stealing` is true, idle workers can steal tasks from other workers' queues. This ensures optimal load balancing across all threads.
+
+```c
+cfg.enable_work_stealing = FQ_TRUE;
+```
+
+## C++ Example
+
+```cpp
+#include <fastqueue/fastqueue.h>
+#include <cstdio>
+#include <thread>
+#include <vector>
+
+int main()
+{
+    fq_scheduler_t *scheduler = nullptr;
+    fq_scheduler_config_t cfg;
+    fq_scheduler_config_default(&cfg);
+    cfg.thread_count = 4;
+    fq_scheduler_create(&scheduler, &cfg);
+
+    std::vector<int> data(500);
+    for (int i = 0; i < 500; ++i) data[i] = i;
+
+    auto compute = [](void *arg) {
+        int *val = static_cast<int *>(arg);
+        *val = (*val) * 2;
+    };
+
+    for (auto &val : data) {
+        fq_scheduler_submit_fn(scheduler, compute, &val);
+    }
+
+    fq_scheduler_wait_idle(scheduler);
+
+    fq_scheduler_stats_t stats;
+    fq_scheduler_stats(scheduler, &stats);
+    printf("Completed: %d tasks\n", stats.tasks_completed);
+
+    fq_scheduler_shutdown(scheduler);
+    return 0;
+}
+```
+
+---
+
+---
+url: /FastQueue/guide/futures.md
+description: >-
+  Learn how to use FastQueue futures for awaitable task results with
+  spin-then-wait strategy.
+---
+
+# Futures
+
+Futures allow you to wait for task completion and retrieve results.
+
+## Basic Usage
+
+```c
+#include <fastqueue/fastqueue.h>
+#include <stdio.h>
+
+static void compute(void *arg)
+{
+    long *result = (long *)arg;
+    long sum = 0;
+    for (long i = 0; i < 1000000; ++i) sum += i;
+    *result = sum;
+}
+
+int main(void)
+{
+    fq_scheduler_t *scheduler = NULL;
+    fq_scheduler_config_t cfg;
+    fq_scheduler_config_default(&cfg);
+    cfg.thread_count = 4;
+    fq_scheduler_create(&scheduler, &cfg);
+
+    long result = 0;
+    fq_future_t *future = NULL;
+    fq_task_t *task = NULL;
+
+    fq_task_create(&task, compute, &result, NULL);
+    fq_scheduler_submit_with_future(scheduler, task, &future);
+
+    fq_future_wait(future);
+    printf("Result: %ld\n", result);
+
+    fq_future_destroy(future);
+    fq_scheduler_shutdown(scheduler);
+    return 0;
+}
+```
+
+## API Reference
+
+### Creation
+
+```c
+fq_status_t fq_future_create(fq_future_t **future, const fq_allocator_t *allocator);
+void fq_future_destroy(fq_future_t *future);
+```
+
+### Waiting
+
+```c
+fq_status_t fq_future_wait(fq_future_t *future);
+fq_status_t fq_future_wait_timeout(fq_future_t *future, unsigned timeout_ms, fq_status_t *status);
+fq_bool_t fq_future_is_ready(const fq_future_t *future);
+```
+
+### Error Handling
+
+```c
+fq_status_t fq_future_status(const fq_future_t *future);
+```
+
+## Multiple Futures
+
+```c
+#include <fastqueue/fastqueue.h>
+#include <stdio.h>
+
+static void compute(void *arg)
+{
+    long *result = (long *)arg;
+    *result = (*result) * (*result);
+}
+
+int main(void)
+{
+    fq_scheduler_t *scheduler = NULL;
+    fq_scheduler_config_t cfg;
+    fq_scheduler_config_default(&cfg);
+    cfg.thread_count = 4;
+    fq_scheduler_create(&scheduler, &cfg);
+
+    long results[5] = {1, 2, 3, 4, 5};
+    fq_future_t *futures[5];
+
+    for (int i = 0; i < 5; ++i) {
+        fq_task_t *task = NULL;
+        fq_task_create(&task, compute, &results[i], NULL);
+        fq_scheduler_submit_with_future(scheduler, task, &futures[i]);
+    }
+
+    for (int i = 0; i < 5; ++i) {
+        fq_future_wait(futures[i]);
+        printf("Result %d: %ld\n", i, results[i]);
+        fq_future_destroy(futures[i]);
+    }
+
+    fq_scheduler_shutdown(scheduler);
+    return 0;
+}
+```
+
+## Timeout
+
+```c
+fq_future_t *future = NULL;
+fq_task_t *task = NULL;
+fq_task_create(&task, slow_task, NULL, NULL);
+fq_scheduler_submit_with_future(scheduler, task, &future);
+
+fq_status_t st = fq_future_wait_timeout(future, 5000, NULL); // 5 second timeout
+if (st == FQ_OK) {
+    printf("Task completed\n");
+} else {
+    printf("Timeout or error\n");
+}
+
+fq_future_destroy(future);
+```
+
+---
+
+---
+url: /FastQueue/guide/memory.md
+description: >-
+  Learn about FastQueue custom allocators and memory management for constrained
+  environments.
+---
+
+# Memory Management
+
+FastQueue supports pluggable allocators for memory-constrained environments.
+
+## Default Allocator
+
+By default, FastQueue uses the system `malloc`/`free`:
+
+```c
+fq_thread_pool_t *pool = NULL;
+fq_thread_pool_create_ex(&pool, 4); // Uses default allocator
+```
+
+## Custom Allocator
+
+```c
+#include <fastqueue/fastqueue.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+static void *my_alloc(size_t size, void *ctx)
+{
+    (void)ctx;
+    printf("Allocating %zu bytes\n", size);
+    return malloc(size);
+}
+
+static void my_free(void *ptr, void *ctx)
+{
+    (void)ctx;
+    free(ptr);
+}
+
+static void *my_realloc(void *ptr, size_t new_size, void *ctx)
+{
+    (void)ctx;
+    return realloc(ptr, new_size);
+}
+
+int main(void)
+{
+    fq_allocator_t alloc = {
+        .alloc   = my_alloc,
+        .realloc = my_realloc,
+        .free    = my_free,
+        .ctx     = NULL
+    };
+
+    fq_scheduler_config_t cfg;
+    fq_scheduler_config_default(&cfg);
+    cfg.allocator = &alloc;
+    cfg.thread_count = 4;
+
+    fq_scheduler_t *scheduler = NULL;
+    fq_scheduler_create(&scheduler, &cfg);
+
+    // Use scheduler...
+
+    fq_scheduler_shutdown(scheduler);
+    return 0;
+}
+```
+
+## Arena Allocator Example
+
+For high-throughput scenarios, an arena allocator can reduce allocation overhead:
+
+```c
+#include <fastqueue/fastqueue.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define ARENA_SIZE (1024 * 1024)
+
+typedef struct {
+    char buffer[ARENA_SIZE];
+    size_t offset;
+} arena_t;
+
+static void *arena_alloc(size_t size, void *ctx)
+{
+    arena_t *arena = (arena_t *)ctx;
+    size_t aligned = (size + 7) & ~(size_t)7;
+    if (arena->offset + aligned > ARENA_SIZE) return NULL;
+    void *ptr = arena->buffer + arena->offset;
+    arena->offset += aligned;
+    return ptr;
+}
+
+static void arena_free(void *ptr, void *ctx)
+{
+    (void)ptr;
+    (void)ctx;
+}
+
+static void *arena_realloc(void *ptr, size_t new_size, void *ctx)
+{
+    (void)ptr;
+    (void)ctx;
+    return NULL;
+}
+
+int main(void)
+{
+    static arena_t arena = {0};
+
+    fq_allocator_t alloc = {
+        .alloc   = arena_alloc,
+        .realloc = arena_realloc,
+        .free    = arena_free,
+        .ctx     = &arena
+    };
+
+    fq_thread_pool_t *pool = NULL;
+    fq_scheduler_config_t cfg;
+    fq_scheduler_config_default(&cfg);
+    cfg.allocator = &alloc;
+    cfg.thread_count = 4;
+
+    fq_thread_pool_create_configured(&pool, &cfg);
+
+    for (int i = 0; i < 1000; ++i) {
+        int *val = arena_alloc(sizeof(int), &arena);
+        if (val) {
+            *val = i;
+            fq_thread_pool_submit_fn(pool, my_task, val);
+        }
+    }
+
+    fq_thread_pool_wait_idle(pool);
+    fq_thread_pool_shutdown(pool);
+    return 0;
+}
+```
+
+## API Reference
+
+```c
+typedef struct fq_allocator_t {
+    void *(*alloc)(size_t size, void *ctx);
+    void *(*realloc)(void *ptr, size_t size, void *ctx);
+    void  (*free)(void *ptr, void *ctx);
+    void  *ctx;
+} fq_allocator_t;
+
+const fq_allocator_t *fq_default_allocator(void);
+```
+
+---
+
+---
+url: /FastQueue/guide/performance.md
+description: >-
+  FastQueue performance characteristics, benchmarking results, and optimization
+  tips.
+---
+
+# Performance
+
+FastQueue is designed for high-throughput, low-latency task execution.
+
+## Benchmark Results
+
+Average throughput across multiple runs:
+
+| Configuration | Jobs | Throughput |
+|---|---|---|
+| 1 thread, 10K jobs | 10,000 | ~1.4M jobs/s |
+| 2 threads, 10K jobs | 10,000 | ~1.1M jobs/s |
+| 4 threads, 10K jobs | 10,000 | ~1.3M jobs/s |
+| 4 threads, 100K jobs | 100,000 | ~1.0M jobs/s |
+| 4 threads, 1M jobs | 1,000,000 | ~1.0M jobs/s |
+
+## Running Benchmarks
+
+```bash
+cmake -B build -DFQ_BUILD_BENCHMARKS=ON -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+./build/benchmarks/Release/fq_benchmark
+```
+
+## Optimization Tips
+
+### 1. Right-size the Thread Count
+
+```c
+// Use hardware concurrency
+cfg.thread_count = 0; // Auto-detect
+
+// Or set manually
+cfg.thread_count = 8; // Match your CPU cores
+```
+
+### 2. Enable Work Stealing
+
+```c
+cfg.enable_work_stealing = FQ_TRUE;
+```
+
+### 3. Use Appropriate Queue Capacity
+
+```c
+// For many small tasks
+cfg.queue_capacity = 8192;
+
+// For fewer large tasks
+cfg.queue_capacity = 256;
+```
+
+### 4. Minimize Lock Contention
+
+Submit tasks from multiple threads to distribute across worker queues:
+
+```c
+// Good: Multiple threads submitting
+#pragma omp parallel for
+for (int i = 0; i < 1000; ++i) {
+    fq_thread_pool_submit_fn(pool, task, &data[i]);
+}
+
+// Bad: Single thread submitting all
+for (int i = 0; i < 1000; ++i) {
+    fq_thread_pool_submit_fn(pool, task, &data[i]);
+}
+```
+
+### 5. Avoid Unnecessary Waiting
+
+```c
+// Use futures instead of wait_idle
+fq_future_t *future = NULL;
+fq_scheduler_submit_with_future(scheduler, task, &future);
+// Do other work...
+fq_future_wait(future); // Wait only when needed
+```
+
+## Profiling
+
+Use your platform's profiler to identify bottlenecks:
+
+```bash
+# Linux perf
+perf record ./build/benchmarks/Release/fq_benchmark
+perf report
+
+# Valgrind
+valgrind --tool=callgrind ./build/benchmarks/Release/fq_benchmark
+
+# macOS Instruments
+instruments -t "Time Profiler" ./build/benchmarks/Release/fq_benchmark
+```
+
+---
+
+---
+url: /FastQueue/guide/troubleshooting.md
+description: Common issues and solutions for FastQueue thread pool library.
+---
+
+# Troubleshooting
+
+## Build Issues
+
+### MSVC: C4114 warnings
+
+If you see volatile qualifier warnings, ensure you're using the latest FastQueue headers which use proper `volatile` qualifiers for MSVC atomics.
+
+### GCC/Clang: unknown type name '\_Thread\_local'
+
+Ensure you're compiling with C23 support:
+
+```bash
+gcc -std=c23 ...
+```
+
+### CMake: Could not find package
+
+If using FetchContent, ensure the git tag is correct:
+
+```cmake
+FetchContent_Declare(
+    FastQueue
+    GIT_REPOSITORY https://github.com/muhammad-fiaz/FastQueue.git
+    GIT_TAG main
+)
+```
+
+## Runtime Issues
+
+### Deadlock in wait\_idle
+
+If `fq_scheduler_wait_idle` hangs:
+
+1. Check that all tasks complete (no infinite loops)
+2. Ensure tasks don't call `wait_idle` recursively
+3. Verify queue capacity is sufficient:
+
+```c
+cfg.queue_capacity = 8192; // Increase capacity
+```
+
+### Tasks not executing
+
+1. Check that the scheduler is not shut down
+2. Verify task submission succeeded:
+
+```c
+fq_status_t st = fq_scheduler_submit_fn(scheduler, task, data);
+if (st != FQ_OK) {
+    fprintf(stderr, "Submit failed: %s\n", fq_status_string(st));
+}
+```
+
+3. Check thread count:
+
+```c
+printf("Thread count: %u\n", cfg.thread_count);
+```
+
+### High memory usage
+
+1. Reduce queue capacity
+2. Use custom allocator with arena/pool strategy
+3. Ensure tasks don't accumulate:
+
+```c
+fq_scheduler_wait_idle(scheduler); // Wait before submitting more
+```
+
+### Tasks appear lost
+
+1. Check queue capacity - tasks submitted to full queues are dropped
+2. Use `fq_scheduler_stats` to verify:
+
+```c
+fq_scheduler_stats_t stats;
+fq_scheduler_stats(scheduler, &stats);
+printf("Submitted: %d, Completed: %d\n", stats.tasks_submitted, stats.tasks_completed);
+```
+
+## Sanitizer Reports
+
+### AddressSanitizer: heap-use-after-free
+
+Ensure tasks don't access freed memory:
+
+```c
+int *data = malloc(sizeof(int));
+*data = 42;
+fq_scheduler_submit_fn(scheduler, task, data);
+// Don't free data here - let the task do it
+```
+
+### ThreadSanitizer: data race
+
+Ensure shared data is properly synchronized:
+
+```c
+// Use mutex for shared data
+fq_mutex_t mutex;
+fq_mutex_init(&mutex);
+
+static void safe_task(void *arg) {
+    fq_mutex_lock(&mutex);
+    shared_counter++;
+    fq_mutex_unlock(&mutex);
+}
+```
+
+## Getting Help
+
+* [GitHub Issues](https://github.com/muhammad-fiaz/FastQueue/issues)
+* [API Reference](/api/overview)
+
+---
+
+---
+url: /FastQueue/guide/faq.md
+description: Frequently asked questions about FastQueue thread pool and job system library.
+---
+
+# Frequently Asked Questions
+
+## General
+
+### What is FastQueue?
+
+FastQueue is a production-ready, high-performance C23 job system and thread pool library. It provides work-stealing thread pools, MPMC queues, futures, and custom allocator support.
+
+### What language is it written in?
+
+FastQueue is written in ISO C23, making it compatible with C2Y/C26 and C++ compilers.
+
+### What platforms are supported?
+
+* Linux (GCC, Clang)
+* Windows (MSVC 2022+)
+* macOS (Clang)
+
+### Is it header-only?
+
+No. FastQueue is a compiled library. You link against `fastqueue.lib` (or `libfastqueue.a` on Linux/macOS).
+
+## Usage
+
+### How many threads should I use?
+
+For CPU-bound tasks, use the number of physical CPU cores:
+
+```c
+cfg.thread_count = 0; // Auto-detect hardware concurrency
+```
+
+For I/O-bound tasks, you can use more threads:
+
+```c
+cfg.thread_count = 16;
+```
+
+### How do I cancel all tasks?
+
+```c
+fq_scheduler_cancel_all(scheduler);
+```
+
+### Can I use it from C++?
+
+Yes. All headers have `extern "C"` guards:
+
+```cpp
+#include <fastqueue/fastqueue.h>
+// Works directly in C++
+```
+
+### How do I handle errors?
+
+All functions return `fq_status_t`:
+
+```c
+fq_status_t st = fq_thread_pool_submit_fn(pool, my_task, NULL);
+if (st != FQ_OK) {
+    fprintf(stderr, "Error: %s\n", fq_status_string(st));
+}
+```
+
+## Building
+
+### CMake minimum version?
+
+CMake 3.20 or newer.
+
+### Compiler requirements?
+
+* GCC 14+
+* Clang 18+
+* MSVC 2022+ (19.40+)
+
+### Can I build as shared library?
+
+Yes:
+
+```bash
+cmake -B build -DFQ_SHARED=ON
+```
+
+### How do I enable sanitizers?
+
+```bash
+cmake -B build -DFQ_ENABLE_ASAN=ON -DFQ_ENABLE_UBSAN=ON
+```
+
+## Performance
+
+### Is it lock-free?
+
+The queue uses mutex protection for MPMC safety. The scheduler uses lock-free atomic operations for task counting.
+
+### What's the maximum throughput?
+
+Benchmarked at ~2M jobs/sec on a 4-core system with trivial tasks.
+
+### How does work stealing work?
+
+When a worker's local queue is empty, it tries to steal tasks from other workers' queues. This ensures all cores stay busy.
+
+---
+
+---
+url: /FastQueue/examples.md
+description: Complete collection of FastQueue examples for all features.
+---
+
+# Examples
+
+All FastQueue examples with complete, runnable code.
+
+## Thread Pool
+
+| Example | Description |
+|---|---|
+| [Basic Jobs](/examples/basic-jobs) | Submit and execute simple tasks |
+| [Parallel For](/examples/parallel-for) | Parallel data processing |
+
+## Scheduler
+
+| Example | Description |
+|---|---|
+| [Scheduler Basics](/examples/basic-jobs) | Low-level scheduler usage |
+| [Work Stealing](/examples/basic-jobs) | Demonstrate work stealing |
+
+## Futures
+
+| Example | Description |
+|---|---|
+| [Futures](/examples/futures) | Awaitable task results |
+| [Multiple Futures](/examples/futures) | Wait for multiple tasks |
+
+## Memory
+
+| Example | Description |
+|---|---|
+| [Custom Allocator](/examples/custom-allocator) | Pluggable allocator interface |
+
+## Patterns
+
+| Example | Description |
+|---|---|
+| [Graceful Shutdown](/examples/graceful-shutdown) | Clean shutdown patterns |
+| [Error Handling](/examples/error-handling) | Error handling best practices |
+
+## C++ Usage
+
+All examples work in C++ with `extern "C"` compatibility:
+
+```cpp
+#include <fastqueue/fastqueue.h>
+#include <cstdio>
+
+int main()
+{
+    fq_thread_pool_t *pool = nullptr;
+    fq_thread_pool_create_ex(&pool, 4);
+    // ... same API as C
+    fq_thread_pool_shutdown(pool);
+    return 0;
+}
+```
+
+---
+
+---
+url: /FastQueue/examples/basic-jobs.md
+description: >-
+  Complete example of submitting and executing basic jobs with the FastQueue
+  thread pool.
+---
+
+# Basic Jobs Example
+
+Submit and execute simple tasks using the thread pool.
+
+## C Version
+
+```c
+#include <fastqueue/fastqueue.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+static void print_task(void *arg)
+{
+    int id = *(int *)arg;
+    printf("Task %d executed on thread\n", id);
+}
+
+int main(void)
+{
+    fq_thread_pool_t *pool = NULL;
+    fq_status_t st = fq_thread_pool_create_ex(&pool, 4);
+    if (st != FQ_OK) {
+        fprintf(stderr, "Failed to create pool: %s\n", fq_status_string(st));
+        return 1;
+    }
+
+    printf("Submitting 8 tasks...\n");
+
+    for (int i = 1; i <= 8; ++i) {
+        int *id = malloc(sizeof(int));
+        *id = i;
+        st = fq_thread_pool_submit_fn(pool, print_task, id);
+        if (st != FQ_OK) {
+            fprintf(stderr, "Submit failed: %s\n", fq_status_string(st));
+            free(id);
+        }
+    }
+
+    printf("Waiting for all tasks...\n");
+    fq_thread_pool_wait_idle(pool);
+
+    printf("Done.\n");
+    fq_thread_pool_shutdown(pool);
+    return 0;
+}
+```
+
+## C++ Version
+
+```cpp
+#include <fastqueue/fastqueue.h>
+#include <cstdio>
+#include <cstdlib>
+#include <vector>
+
+int main()
+{
+    fq_thread_pool_t *pool = nullptr;
+    fq_thread_pool_create_ex(&pool, 4);
+
+    auto print_task = [](void *arg) {
+        int id = *static_cast<int *>(arg);
+        std::printf("Task %d executed on thread\n", id);
+    };
+
+    std::printf("Submitting 8 tasks...\n");
+
+    for (int i = 1; i <= 8; ++i) {
+        int *id = new int(i);
+        fq_thread_pool_submit_fn(pool, print_task, id);
+    }
+
+    std::printf("Waiting for all tasks...\n");
+    fq_thread_pool_wait_idle(pool);
+
+    std::printf("Done.\n");
+    fq_thread_pool_shutdown(pool);
+    return 0;
+}
+```
+
+## Build and Run
+
+```bash
+# C
+gcc -std=c23 -o basic_jobs basic_jobs.c -lfastqueue -lpthread
+./basic_jobs
+
+# C++
+g++ -std=c++20 -o basic_jobs basic_jobs.cpp -lfastqueue -lpthread
+./basic_jobs
+```
+
+## Expected Output
+
+```
+Submitting 8 tasks...
+Waiting for all tasks...
+Task 1 executed on thread
+Task 5 executed on thread
+Task 2 executed on thread
+Task 6 executed on thread
+Task 3 executed on thread
+Task 7 executed on thread
+Task 4 executed on thread
+Task 8 executed on thread
+Done.
+```
+
+---
+
+---
+url: /FastQueue/examples/futures.md
+description: Complete example of using FastQueue futures for awaitable task results.
+---
+
+# Futures Example
+
+Use futures to wait for task completion and retrieve results.
+
+## C Version
+
+```c
+#include <fastqueue/fastqueue.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+static void compute_square(void *arg)
+{
+    long *result = (long *)arg;
+    *result = (*result) * (*result);
+}
+
+static void compute_sum(void *arg)
+{
+    long *result = (long *)arg;
+    long sum = 0;
+    for (long i = 1; i <= *result; ++i) sum += i;
+    *result = sum;
+}
+
+int main(void)
+{
+    fq_scheduler_t *scheduler = NULL;
+    fq_scheduler_config_t cfg;
+    fq_scheduler_config_default(&cfg);
+    cfg.thread_count = 4;
+
+    fq_status_t st = fq_scheduler_create(&scheduler, &cfg);
+    if (st != FQ_OK) {
+        fprintf(stderr, "Failed: %s\n", fq_status_string(st));
+        return 1;
+    }
+
+    // Square computation
+    long square_val = 42;
+    fq_task_t *square_task = NULL;
+    fq_future_t *square_future = NULL;
+    fq_task_create(&square_task, compute_square, &square_val, NULL);
+    fq_scheduler_submit_with_future(scheduler, square_task, &square_future);
+
+    // Sum computation
+    long sum_val = 100;
+    fq_task_t *sum_task = NULL;
+    fq_future_t *sum_future = NULL;
+    fq_task_create(&sum_task, compute_sum, &sum_val, NULL);
+    fq_scheduler_submit_with_future(scheduler, sum_task, &sum_future);
+
+    // Wait for results
+    fq_future_wait(square_future);
+    printf("42 squared = %ld\n", square_val);
+
+    fq_future_wait(sum_future);
+    printf("Sum 1..100 = %ld\n", sum_val);
+
+    fq_future_destroy(square_future);
+    fq_future_destroy(sum_future);
+    fq_scheduler_shutdown(scheduler);
+    return 0;
+}
+```
+
+## C++ Version
+
+```cpp
+#include <fastqueue/fastqueue.h>
+#include <cstdio>
+
+int main()
+{
+    fq_scheduler_t *scheduler = nullptr;
+    fq_scheduler_config_t cfg;
+    fq_scheduler_config_default(&cfg);
+    cfg.thread_count = 4;
+    fq_scheduler_create(&scheduler, &cfg);
+
+    auto compute_square = [](void *arg) {
+        auto *result = static_cast<long *>(arg);
+        *result = (*result) * (*result);
+    };
+
+    long value = 42;
+    fq_task_t *task = nullptr;
+    fq_future_t *future = nullptr;
+    fq_task_create(&task, compute_square, &value, nullptr);
+    fq_scheduler_submit_with_future(scheduler, task, &future);
+
+    fq_future_wait(future);
+    std::printf("42 squared = %ld\n", value);
+
+    fq_future_destroy(future);
+    fq_scheduler_shutdown(scheduler);
+    return 0;
+}
+```
+
+## Build and Run
+
+```bash
+gcc -std=c23 -o futures futures.c -lfastqueue -lpthread
+./futures
+```
+
+## Expected Output
+
+```
+42 squared = 1764
+Sum 1..100 = 5050
+```
+
+---
+
+---
+url: /FastQueue/examples/parallel-for.md
+description: Process array elements in parallel using the FastQueue thread pool.
+---
+
+# Parallel For Example
+
+Process array elements in parallel across multiple threads.
+
+## C Version
+
+```c
+#include <fastqueue/fastqueue.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct {
+    int *data;
+    int start;
+    int end;
+} range_t;
+
+static void square_range(void *arg)
+{
+    range_t *r = (range_t *)arg;
+    for (int i = r->start; i < r->end; ++i) {
+        r->data[i] = r->data[i] * r->data[i];
+    }
+}
+
+int main(void)
+{
+    const int N = 1000000;
+    const int THREADS = 4;
+    int *data = malloc(N * sizeof(int));
+
+    for (int i = 0; i < N; ++i) data[i] = i;
+
+    fq_thread_pool_t *pool = NULL;
+    fq_thread_pool_create_ex(&pool, THREADS);
+
+    int chunk = N / THREADS;
+    range_t ranges[THREADS];
+
+    for (int i = 0; i < THREADS; ++i) {
+        ranges[i].data  = data;
+        ranges[i].start = i * chunk;
+        ranges[i].end   = (i == THREADS - 1) ? N : (i + 1) * chunk;
+        fq_thread_pool_submit_fn(pool, square_range, &ranges[i]);
+    }
+
+    fq_thread_pool_wait_idle(pool);
+
+    printf("data[0]=%d data[999]=%d data[999999]=%d\n",
+           data[0], data[999], data[999999]);
+
+    fq_thread_pool_shutdown(pool);
+    free(data);
+    return 0;
+}
+```
+
+## C++ Version
+
+```cpp
+#include <fastqueue/fastqueue.h>
+#include <cstdio>
+#include <vector>
+#include <thread>
+
+int main()
+{
+    const int N = 1000000;
+    const int THREADS = 4;
+    std::vector<int> data(N);
+    for (int i = 0; i < N; ++i) data[i] = i;
+
+    fq_thread_pool_t *pool = nullptr;
+    fq_thread_pool_create_ex(&pool, THREADS);
+
+    int chunk = N / THREADS;
+
+    auto square_range = [&data](void *arg) {
+        auto *range = static_cast<std::pair<int, int> *>(arg);
+        for (int i = range->first; i < range->second; ++i) {
+            data[i] = data[i] * data[i];
+        }
+    };
+
+    std::vector<std::pair<int, int>> ranges(THREADS);
+    for (int i = 0; i < THREADS; ++i) {
+        ranges[i] = {i * chunk, (i == THREADS - 1) ? N : (i + 1) * chunk};
+        fq_thread_pool_submit_fn(pool, square_range, &ranges[i]);
+    }
+
+    fq_thread_pool_wait_idle(pool);
+
+    std::printf("data[0]=%d data[999]=%d data[999999]=%d\n",
+                data[0], data[999], data[999999]);
+
+    fq_thread_pool_shutdown(pool);
+    return 0;
+}
+```
+
+## Expected Output
+
+```
+data[0]=0 data[999]=998001 data[999999]=999998000001
+```
+
+---
+
+---
+url: /FastQueue/examples/custom-allocator.md
+description: Use a custom allocator with FastQueue for memory-constrained environments.
+---
+
+# Custom Allocator Example
+
+Use a custom allocator with FastQueue.
+
+## C Version
+
+```c
+#include <fastqueue/fastqueue.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+static int alloc_count = 0;
+static int free_count = 0;
+
+static void *counting_alloc(size_t size, void *ctx)
+{
+    (void)ctx;
+    alloc_count++;
+    return malloc(size);
+}
+
+static void counting_free(void *ptr, void *ctx)
+{
+    (void)ctx;
+    free_count++;
+    free(ptr);
+}
+
+static void *counting_realloc(void *ptr, size_t new_size, void *ctx)
+{
+    (void)ctx;
+    return realloc(ptr, new_size);
+}
+
+static void task_fn(void *arg)
+{
+    printf("Task %d executed\n", *(int *)arg);
+}
+
+int main(void)
+{
+    fq_allocator_t alloc = {
+        .alloc   = counting_alloc,
+        .realloc = counting_realloc,
+        .free    = counting_free,
+        .ctx     = NULL
+    };
+
+    fq_thread_pool_t *pool = NULL;
+    fq_scheduler_config_t cfg;
+    fq_scheduler_config_default(&cfg);
+    cfg.allocator = &alloc;
+    cfg.thread_count = 4;
+
+    fq_thread_pool_create_configured(&pool, &cfg);
+
+    for (int i = 0; i < 50; ++i) {
+        int *val = malloc(sizeof(int));
+        *val = i;
+        fq_thread_pool_submit_fn(pool, task_fn, val);
+    }
+
+    fq_thread_pool_wait_idle(pool);
+    fq_thread_pool_shutdown(pool);
+
+    printf("Allocations: %d, Frees: %d\n", alloc_count, free_count);
+    return 0;
+}
+```
+
+## Arena Allocator
+
+```c
+#include <fastqueue/fastqueue.h>
+#include <stdio.h>
+#include <string.h>
+
+#define ARENA_SIZE (1024 * 1024)
+
+typedef struct {
+    char buffer[ARENA_SIZE];
+    size_t offset;
+} arena_t;
+
+static void *arena_alloc(size_t size, void *ctx)
+{
+    arena_t *a = (arena_t *)ctx;
+    size_t aligned = (size + 7) & ~(size_t)7;
+    if (a->offset + aligned > ARENA_SIZE) return NULL;
+    void *ptr = a->buffer + a->offset;
+    a->offset += aligned;
+    return ptr;
+}
+
+static void arena_free(void *ptr, void *ctx)
+{
+    (void)ptr; (void)ctx;
+}
+
+static void *arena_realloc(void *ptr, size_t new_size, void *ctx)
+{
+    (void)ptr; (void)ctx;
+    return NULL;
+}
+
+int main(void)
+{
+    static arena_t arena = {0};
+
+    fq_allocator_t alloc = {
+        .alloc   = arena_alloc,
+        .realloc = arena_realloc,
+        .free    = arena_free,
+        .ctx     = &arena
+    };
+
+    fq_thread_pool_t *pool = NULL;
+    fq_scheduler_config_t cfg;
+    fq_scheduler_config_default(&cfg);
+    cfg.allocator = &alloc;
+    cfg.thread_count = 4;
+
+    fq_thread_pool_create_configured(&pool, &cfg);
+
+    for (int i = 0; i < 100; ++i) {
+        int *val = arena_alloc(sizeof(int), &arena);
+        if (val) {
+            *val = i;
+            fq_thread_pool_submit_fn(pool, task_fn, val);
+        }
+    }
+
+    fq_thread_pool_wait_idle(pool);
+    fq_thread_pool_shutdown(pool);
+    return 0;
+}
+```
+
+## C++ Version
+
+```cpp
+#include <fastqueue/fastqueue.h>
+#include <cstdio>
+#include <cstdlib>
+
+static int alloc_count = 0;
+
+static void *tracking_alloc(std::size_t size, void *) {
+    alloc_count++;
+    return std::malloc(size);
+}
+
+static void tracking_free(void *ptr, void *) {
+    alloc_count--;
+    std::free(ptr);
+}
+
+static void *tracking_realloc(void *ptr, size_t new_size, void *) {
+    return std::realloc(ptr, new_size);
+}
+
+int main()
+{
+    fq_allocator_t alloc = { tracking_alloc, tracking_realloc, tracking_free, nullptr };
+
+    fq_thread_pool_t *pool = nullptr;
+    fq_scheduler_config_t cfg;
+    fq_scheduler_config_default(&cfg);
+    cfg.allocator = &alloc;
+    cfg.thread_count = 4;
+
+    fq_thread_pool_create_configured(&pool, &cfg);
+
+    for (int i = 0; i < 50; ++i) {
+        int *val = new int(i);
+        fq_thread_pool_submit_fn(pool, [](void *arg) {
+            std::printf("Task %d\n", *static_cast<int *>(arg));
+        }, val);
+    }
+
+    fq_thread_pool_wait_idle(pool);
+    fq_thread_pool_shutdown(pool);
+
+    std::printf("Active allocations: %d\n", alloc_count);
+    return 0;
+}
+```
+
+## Expected Output
+
+```
+Task 0 executed
+Task 1 executed
+...
+Allocations: 51, Frees: 51
+```
+
+---
+
+---
+url: /FastQueue/examples/graceful-shutdown.md
+description: Properly shut down a FastQueue scheduler with graceful task completion.
+---
+
+# Graceful Shutdown Example
+
+Properly shut down a scheduler after all tasks complete.
+
+## C Version
+
+```c
+#include <fastqueue/fastqueue.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <signal.h>
+
+static fq_scheduler_t *g_scheduler = NULL;
+
+static void signal_handler(int sig)
+{
+    (void)sig;
+    printf("\nCaught signal, shutting down...\n");
+    if (g_scheduler) {
+        fq_scheduler_cancel_all(g_scheduler);
+    }
+}
+
+static void long_task(void *arg)
+{
+    int id = *(int *)arg;
+    printf("Task %d started\n", id);
+    // Simulate work
+    for (volatile int i = 0; i < 1000000; ++i) {}
+    printf("Task %d completed\n", id);
+}
+
+int main(void)
+{
+    signal(SIGINT, signal_handler);
+
+    fq_scheduler_config_t cfg;
+    fq_scheduler_config_default(&cfg);
+    cfg.thread_count = 4;
+
+    fq_scheduler_create(&g_scheduler, &cfg);
+
+    for (int i = 0; i < 20; ++i) {
+        int *id = malloc(sizeof(int));
+        *id = i;
+        fq_scheduler_submit_fn(g_scheduler, long_task, id);
+    }
+
+    printf("Waiting for tasks to complete...\n");
+    fq_scheduler_wait_idle(g_scheduler);
+
+    fq_scheduler_stats_t stats;
+    fq_scheduler_stats(g_scheduler, &stats);
+    printf("Completed: %d tasks\n", stats.tasks_completed);
+
+    fq_scheduler_shutdown(g_scheduler);
+    g_scheduler = NULL;
+
+    printf("Shutdown complete.\n");
+    return 0;
+}
+```
+
+## C++ Version
+
+```cpp
+#include <fastqueue/fastqueue.h>
+#include <cstdio>
+#include <cstdlib>
+#include <atomic>
+#include <csignal>
+
+static fq_scheduler_t *g_scheduler = nullptr;
+static std::atomic<bool> g_running{true};
+
+static void signal_handler(int) {
+    g_running = false;
+    if (g_scheduler) fq_scheduler_cancel_all(g_scheduler);
+}
+
+int main()
+{
+    std::signal(SIGINT, signal_handler);
+
+    fq_scheduler_config_t cfg;
+    fq_scheduler_config_default(&cfg);
+    cfg.thread_count = 4;
+    fq_scheduler_create(&g_scheduler, &cfg);
+
+    for (int i = 0; i < 20; ++i) {
+        int *id = new int(i);
+        fq_scheduler_submit_fn(g_scheduler, [](void *arg) {
+            int id = *static_cast<int *>(arg);
+            std::printf("Task %d\n", id);
+            for (volatile int j = 0; j < 1000000; ++j) {}
+        }, id);
+    }
+
+    fq_scheduler_wait_idle(g_scheduler);
+
+    fq_scheduler_stats_t stats;
+    fq_scheduler_stats(g_scheduler, &stats);
+    std::printf("Completed: %d tasks\n", stats.tasks_completed);
+
+    fq_scheduler_shutdown(g_scheduler);
+    g_scheduler = nullptr;
+    return 0;
+}
+```
+
+## Build and Run
+
+```bash
+gcc -std=c23 -o graceful_shutdown graceful_shutdown.c -lfastqueue -lpthread
+./graceful_shutdown
+
+# Press Ctrl+C to test signal handling
+```
+
+---
+
+---
+url: /FastQueue/examples/error-handling.md
+description: Proper error handling patterns for FastQueue operations.
+---
+
+# Error Handling Example
+
+Proper error handling patterns.
+
+## C Version
+
+```c
+#include <fastqueue/fastqueue.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+static void safe_task(void *arg)
+{
+    int id = *(int *)arg;
+    printf("Task %d executed safely\n", id);
+}
+
+int main(void)
+{
+    fq_status_t st;
+
+    // 1. Check creation
+    fq_thread_pool_t *pool = NULL;
+    st = fq_thread_pool_create_ex(&pool, 4);
+    if (st != FQ_OK) {
+        fprintf(stderr, "Pool creation failed: %s (code=%d)\n",
+                fq_status_string(st), st);
+        return 1;
+    }
+
+    // 2. Check submissions
+    for (int i = 0; i < 10; ++i) {
+        int *id = malloc(sizeof(int));
+        if (!id) {
+            fprintf(stderr, "Memory allocation failed\n");
+            continue;
+        }
+        *id = i;
+
+        st = fq_thread_pool_submit_fn(pool, safe_task, id);
+        if (st != FQ_OK) {
+            fprintf(stderr, "Submit task %d failed: %s\n",
+                    i, fq_status_string(st));
+            free(id);
+        }
+    }
+
+    // 3. Wait and check
+    fq_thread_pool_wait_idle(pool);
+
+    // 4. Shutdown
+    st = fq_thread_pool_shutdown(pool);
+    if (st != FQ_OK) {
+        fprintf(stderr, "Shutdown failed: %s\n", fq_status_string(st));
+        return 1;
+    }
+
+    printf("All operations completed successfully.\n");
+    return 0;
+}
+```
+
+## Scheduler with Error Checking
+
+```c
+#include <fastqueue/fastqueue.h>
+#include <stdio.h>
+
+static void validated_task(void *arg)
+{
+    if (!arg) {
+        fprintf(stderr, "Task received NULL argument\n");
+        return;
+    }
+    printf("Result: %d\n", *(int *)arg);
+}
+
+int main(void)
+{
+    fq_scheduler_t *scheduler = NULL;
+    fq_scheduler_config_t cfg;
+    fq_scheduler_config_default(&cfg);
+    cfg.thread_count = 2;
+
+    fq_status_t st = fq_scheduler_create(&scheduler, &cfg);
+    if (st != FQ_OK) {
+        fprintf(stderr, "Scheduler create: %s\n", fq_status_string(st));
+        return 1;
+    }
+
+    int values[] = {10, 20, 30, 40, 50};
+    for (int i = 0; i < 5; ++i) {
+        st = fq_scheduler_submit_fn(scheduler, validated_task, &values[i]);
+        if (st != FQ_OK) {
+            fprintf(stderr, "Submit %d: %s\n", i, fq_status_string(st));
+        }
+    }
+
+    fq_scheduler_wait_idle(scheduler);
+
+    fq_scheduler_stats_t stats;
+    fq_scheduler_stats(scheduler, &stats);
+    printf("Stats: submitted=%lu completed=%lu\n",
+           stats.tasks_submitted, stats.tasks_completed);
+
+    fq_scheduler_shutdown(scheduler);
+    return 0;
+}
+```
+
+## C++ Version
+
+```cpp
+#include <fastqueue/fastqueue.h>
+#include <iostream>
+#include <memory>
+
+int main()
+{
+    fq_thread_pool_t *pool = nullptr;
+    fq_status_t st = fq_thread_pool_create_ex(&pool, 4);
+
+    if (st != FQ_OK) {
+        std::cerr << "Failed: " << fq_status_string(st) << "\n";
+        return 1;
+    }
+
+    for (int i = 0; i < 10; ++i) {
+        auto id = std::make_unique<int>(i);
+        st = fq_thread_pool_submit_fn(pool, [](void *arg) {
+            std::cout << "Task " << *static_cast<int *>(arg) << "\n";
+        }, id.get());
+
+        if (st != FQ_OK) {
+            std::cerr << "Submit failed: " << fq_status_string(st) << "\n";
+        } else {
+            id.release(); // Transfer ownership to pool
+        }
+    }
+
+    fq_thread_pool_wait_idle(pool);
+    fq_thread_pool_shutdown(pool);
+    return 0;
+}
+```
+
+## Error Codes Reference
+
+| Code | Name | Meaning |
+|---|---|---|
+| 0 | `FQ_OK` | Success |
+| -1 | `FQ_ERR_NOMEM` | Out of memory |
+| -2 | `FQ_ERR_INVAL` | Invalid argument |
+| -3 | `FQ_ERR_BUSY` | Resource busy |
+| -4 | `FQ_ERR_TIMEOUT` | Operation timed out |
+| -5 | `FQ_ERR_CANCELED` | Operation was canceled |
+| -6 | `FQ_ERR_OVERFLOW` | Queue overflow |
+| -7 | `FQ_ERR_CLOSED` | Resource closed |
+| -8 | `FQ_ERR_INTERNAL` | Internal error |
+| -9 | `FQ_ERR_NOSUPPORT` | Not supported |
+
+---
+
+---
+url: /FastQueue/api/overview.md
+description: Complete API reference for FastQueue C23 thread pool and job system library.
+---
+
+# API Overview
+
+FastQueue provides a layered API:
+
+## Headers
+
+| Header | Description |
+|---|---|
+| `fastqueue/fastqueue.h` | Master include (includes everything) |
+| `fastqueue/thread_pool.h` | High-level thread pool API |
+| `fastqueue/scheduler.h` | Low-level scheduler API |
+| `fastqueue/queue.h` | Thread-safe queue |
+| `fastqueue/future.h` | Futures and promises |
+| `fastqueue/task.h` | Task creation and management |
+| `fastqueue/memory.h` | Custom allocator support |
+| `fastqueue/errors.h` | Error codes and messages |
+| `fastqueue/config.h` | Configuration constants |
+| `fastqueue/version.h` | Version information |
+| `fastqueue/atomic.h` | Atomic operations |
+| `fastqueue/platform.h` | Platform abstraction |
+| `fastqueue/parallel.h` | Parallel for-loop utility |
+| `fastqueue/time.h` | Time and timer utilities |
+| `fastqueue/types.h` | Type definitions |
+
+## Naming Conventions
+
+* All public symbols prefixed with `fq_`
+* Types: `fq_<name>_t`
+* Functions: `fq_<module>_<action>`
+* Enums: `fq_<name>_t` with `FQ_<NAME>_<VALUE>`
+* Constants: `FQ_<NAME>`
+
+## Error Handling
+
+All functions return `fq_status_t`:
+
+```c
+fq_status_t st = fq_thread_pool_create_ex(&pool, 4);
+if (st != FQ_OK) {
+    fprintf(stderr, "Error: %s\n", fq_status_string(st));
+    return 1;
+}
+```
+
+## Quick Reference
+
+### Thread Pool
+
+```c
+fq_thread_pool_create_ex(&pool, threads);
+fq_thread_pool_submit_fn(pool, fn, data);
+fq_thread_pool_wait_idle(pool);
+fq_thread_pool_shutdown(pool);
+```
+
+### Scheduler
+
+```c
+fq_scheduler_create(&scheduler, &cfg);
+fq_scheduler_submit_fn(scheduler, fn, data);
+fq_scheduler_wait_idle(scheduler);
+fq_scheduler_shutdown(scheduler);
+```
+
+### Future
+
+```c
+fq_future_create(&future, allocator);
+fq_future_wait(future);
+fq_future_destroy(future);
+```
+
+### Queue
+
+```c
+fq_queue_create(&queue, capacity, allocator);
+fq_queue_push(queue, task);
+fq_queue_pop(queue, &task);
+fq_queue_destroy(queue);
+```
+
+### Parallel For
+
+```c
+fq_thread_pool_parallel_for(pool, 0, N, fn, ctx);
+fq_scheduler_parallel_for(scheduler, 0, N, fn, ctx);
+```
+
+### Time
+
+```c
+int64_t now = fq_time_now_ns();
+fq_timer_start(&timer);
+int64_t elapsed = fq_timer_elapsed_ns(&timer);
+```
+
+---
+
+---
+url: /FastQueue/api/thread_pool.md
+description: >-
+  FastQueue thread pool API reference with creation, submission, and lifecycle
+  functions.
+---
+
+# Thread Pool API
+
+High-level thread pool interface wrapping the scheduler.
+
+## Types
+
+```c
+typedef struct fq_thread_pool_t fq_thread_pool_t;
+```
+
+## Functions
+
+### Creation
+
+```c
+fq_status_t fq_thread_pool_create(fq_thread_pool_t **pool);
+```
+
+Create a thread pool with default settings (auto-detect thread count).
+
+```c
+fq_status_t fq_thread_pool_create_ex(fq_thread_pool_t **pool, unsigned thread_count);
+```
+
+Create a thread pool with specific thread count.
+
+```c
+fq_status_t fq_thread_pool_create_configured(
+    fq_thread_pool_t **pool,
+    const fq_scheduler_config_t *config
+);
+```
+
+Create a thread pool with full configuration.
+
+### Task Submission
+
+```c
+fq_status_t fq_thread_pool_submit_fn(
+    fq_thread_pool_t *pool,
+    fq_task_fn fn,
+    void *user_data
+);
+```
+
+Submit a function pointer as a task.
+
+```c
+fq_status_t fq_thread_pool_submit(fq_thread_pool_t *pool, fq_task_t *task);
+```
+
+Submit a pre-built task.
+
+```c
+fq_status_t fq_thread_pool_submit_with_future(
+    fq_thread_pool_t *pool,
+    fq_task_t *task,
+    fq_future_t **future
+);
+```
+
+Submit a task and get a future for the result.
+
+### Lifecycle
+
+```c
+void fq_thread_pool_wait_idle(fq_thread_pool_t *pool);
+```
+
+Block until all submitted tasks complete.
+
+```c
+fq_bool_t fq_thread_pool_is_idle(const fq_thread_pool_t *pool);
+```
+
+Check if the pool is idle.
+
+```c
+unsigned fq_thread_pool_size(const fq_thread_pool_t *pool);
+```
+
+Get the number of worker threads.
+
+```c
+fq_status_t fq_thread_pool_shutdown(fq_thread_pool_t *pool);
+```
+
+Shutdown the pool and free resources.
+
+### Statistics
+
+```c
+void fq_thread_pool_stats(const fq_thread_pool_t *pool, fq_scheduler_stats_t *stats);
+```
+
+Get pool statistics.
+
+## Example
+
+```c
+#include <fastqueue/fastqueue.h>
+#include <stdio.h>
+
+static void task(void *arg)
+{
+    printf("Task %d\n", *(int *)arg);
+}
+
+int main(void)
+{
+    fq_thread_pool_t *pool = NULL;
+    fq_thread_pool_create_ex(&pool, 4);
+
+    for (int i = 0; i < 100; ++i) {
+        int *id = malloc(sizeof(int));
+        *id = i;
+        fq_thread_pool_submit_fn(pool, task, id);
+    }
+
+    fq_thread_pool_wait_idle(pool);
+    fq_thread_pool_shutdown(pool);
+    return 0;
+}
+```
+
+---
+
+---
+url: /FastQueue/api/scheduler.md
+description: >-
+  FastQueue scheduler API reference with configuration, submission, and
+  lifecycle functions.
+---
+
+# Scheduler API
+
+Low-level scheduler API with fine-grained control.
+
+## Types
+
+```c
+typedef struct fq_scheduler_t fq_scheduler_t;
+
+typedef struct fq_scheduler_config_t {
+    unsigned    thread_count;
+    size_t      queue_capacity;
+    fq_bool_t   enable_work_stealing;
+    fq_bool_t   enable_priority;
+    const fq_allocator_t *allocator;
+    fq_log_fn   log_callback;
+    void       *log_context;
+    fq_log_level_t log_level;
+} fq_scheduler_config_t;
+
+typedef struct fq_scheduler_stats_t {
+    unsigned thread_count;
+    size_t   tasks_submitted;
+    size_t   tasks_completed;
+    size_t   tasks_canceled;
+    size_t   tasks_pending;
+    size_t   tasks_active;
+    uint64_t total_wait_ns;
+    uint64_t total_work_ns;
+} fq_scheduler_stats_t;
+```
+
+## Functions
+
+### Configuration
+
+```c
+void fq_scheduler_config_default(fq_scheduler_config_t *config);
+```
+
+Initialize config with default values.
+
+### Creation / Destruction
+
+```c
+fq_status_t fq_scheduler_create(
+    fq_scheduler_t **scheduler,
+    const fq_scheduler_config_t *config
+);
+fq_status_t fq_scheduler_shutdown(fq_scheduler_t *scheduler);
+```
+
+### Task Submission
+
+```c
+fq_status_t fq_scheduler_submit(fq_scheduler_t *scheduler, fq_task_t *task);
+fq_status_t fq_scheduler_submit_fn(fq_scheduler_t *scheduler, fq_task_fn fn, void *user_data);
+fq_status_t fq_scheduler_submit_with_future(
+    fq_scheduler_t *scheduler, fq_task_t *task, fq_future_t **future
+);
+```
+
+### Lifecycle
+
+```c
+void fq_scheduler_wait_idle(fq_scheduler_t *scheduler);
+fq_bool_t fq_scheduler_is_idle(const fq_scheduler_t *scheduler);
+fq_bool_t fq_scheduler_is_shutdown(const fq_scheduler_t *scheduler);
+void fq_scheduler_cancel_all(fq_scheduler_t *scheduler);
+```
+
+`fq_scheduler_cancel_all` forcibly cancels all pending tasks and shuts down the scheduler.
+
+### Statistics
+
+```c
+void fq_scheduler_stats(const fq_scheduler_t *scheduler, fq_scheduler_stats_t *stats);
+```
+
+---
+
+---
+url: /FastQueue/api/queue.md
+description: FastQueue thread-safe MPMC queue API reference.
+---
+
+# Queue API
+
+Thread-safe multi-producer multi-consumer queue.
+
+## Types
+
+```c
+typedef struct fq_queue_t fq_queue_t;
+```
+
+## Functions
+
+### Creation
+
+```c
+fq_status_t fq_queue_create(fq_queue_t **queue, size_t capacity, const fq_allocator_t *allocator);
+void fq_queue_destroy(fq_queue_t *queue);
+```
+
+### Operations
+
+```c
+fq_status_t fq_queue_push(fq_queue_t *queue, fq_task_t *task);
+fq_status_t fq_queue_pop(fq_queue_t *queue, fq_task_t **task);
+fq_status_t fq_queue_try_pop(fq_queue_t *queue, fq_task_t **task);
+```
+
+### Queries
+
+```c
+size_t fq_queue_size(const fq_queue_t *queue);
+fq_bool_t fq_queue_empty(const fq_queue_t *queue);
+size_t fq_queue_capacity(const fq_queue_t *queue);
+```
+
+### Bulk Operations
+
+```c
+size_t fq_queue_drain(fq_queue_t *queue, fq_task_t **out, size_t max);
+```
+
+Drain up to `max` tasks from the queue into `out`. Returns the number of tasks actually drained.
+
+---
+
+---
+url: /FastQueue/api/future.md
+description: FastQueue future API reference for awaitable task results.
+---
+
+# Future API
+
+Awaitable results for task completion.
+
+## Types
+
+```c
+typedef struct fq_future_t fq_future_t;
+```
+
+## Functions
+
+### Creation
+
+```c
+fq_status_t fq_future_create(fq_future_t **future, const fq_allocator_t *allocator);
+void fq_future_destroy(fq_future_t *future);
+```
+
+### Waiting
+
+```c
+fq_status_t fq_future_wait(fq_future_t *future);
+```
+
+Block until the future is ready. Returns the status of the completed operation.
+
+```c
+fq_status_t fq_future_wait_timeout(fq_future_t *future, unsigned timeout_ms, fq_status_t *status);
+```
+
+Block with timeout. The `status` pointer receives the result status (may be NULL). Returns `FQ_OK` on success, `FQ_ERR_TIMEOUT` on timeout.
+
+```c
+fq_bool_t fq_future_is_ready(const fq_future_t *future);
+```
+
+Non-blocking check if ready.
+
+```c
+fq_bool_t fq_future_is_canceled(const fq_future_t *future);
+```
+
+Check whether the future was canceled.
+
+### Status
+
+```c
+fq_status_t fq_future_status(const fq_future_t *future);
+```
+
+Get the task's execution status. Returns `FQ_ERR_BUSY` if still pending.
+
+### Callbacks
+
+```c
+fq_status_t fq_future_on_complete(fq_future_t *future, fq_completion_fn callback, void *user_data);
+```
+
+Attach a completion callback. If the future is already fulfilled, the callback is invoked immediately on the calling thread.
+
+### Cancellation
+
+```c
+fq_status_t fq_future_cancel(fq_future_t *future);
+```
+
+Cancel a pending future. The completion callback (if any) is invoked with `FQ_ERR_CANCELED`. Returns `FQ_OK` on success, `FQ_ERR_CLOSED` if already fulfilled.
+
+### Promise (Internal)
+
+```c
+void fq_future_set_result(fq_future_t *future, fq_status_t status);
+```
+
+Fulfill a future with a result status. Called internally by the scheduler.
+
+---
+
+---
+url: /FastQueue/api/task.md
+description: FastQueue task API reference for creating and managing individual tasks.
+---
+
+# Task API
+
+Task creation and management.
+
+## Types
+
+```c
+typedef struct fq_task_t fq_task_t;
+typedef void (*fq_task_fn)(void *user_data);
+typedef void (*fq_completion_fn)(void *user_data, fq_status_t status);
+```
+
+## Enums
+
+```c
+typedef enum fq_priority_t {
+    FQ_PRIORITY_LOW    = 0,
+    FQ_PRIORITY_NORMAL = 1,
+    FQ_PRIORITY_HIGH   = 2,
+    FQ_PRIORITY_URGENT = 3
+} fq_priority_t;
+```
+
+## Functions
+
+### Creation
+
+```c
+fq_status_t fq_task_create(
+    fq_task_t **task,
+    fq_task_fn fn,
+    void *user_data,
+    const fq_allocator_t *allocator
+);
+void fq_task_destroy(fq_task_t *task);
+```
+
+### Creation with Completion
+
+```c
+fq_status_t fq_task_create_with_completion(
+    fq_task_t **task,
+    fq_task_fn callback,
+    void *user_data,
+    fq_completion_fn completion,
+    void *completion_data,
+    const fq_allocator_t *allocator
+);
+```
+
+Create a task with an attached completion callback. The completion is invoked with the task's status when execution finishes.
+
+### Properties
+
+```c
+void *fq_task_user_data(const fq_task_t *task);
+fq_priority_t fq_task_priority(const fq_task_t *task);
+void fq_task_set_priority(fq_task_t *task, fq_priority_t priority);
+fq_bool_t fq_task_is_executed(const fq_task_t *task);
+fq_bool_t fq_task_is_canceled(const fq_task_t *task);
+```
+
+### Future
+
+```c
+void fq_task_set_future(fq_task_t *task, fq_future_t *future);
+fq_future_t *fq_task_future(const fq_task_t *task);
+```
+
+---
+
+---
+url: /FastQueue/api/memory.md
+description: FastQueue memory allocator API reference for custom memory management.
+---
+
+# Memory API
+
+Custom allocator interface and memory utilities.
+
+## Types
+
+```c
+typedef struct fq_allocator_t {
+    void *(*alloc)(size_t size, void *ctx);
+    void *(*realloc)(void *ptr, size_t size, void *ctx);
+    void  (*free)(void *ptr, void *ctx);
+    void  *ctx;
+} fq_allocator_t;
+```
+
+## Allocator Functions
+
+```c
+const fq_allocator_t *fq_default_allocator(void);
+```
+
+Get the default system allocator.
+
+```c
+void *fq_alloc(const fq_allocator_t *allocator, size_t size);
+void *fq_calloc(const fq_allocator_t *allocator, size_t count, size_t size);
+void *fq_realloc(const fq_allocator_t *allocator, void *ptr, size_t new_size);
+void fq_free(const fq_allocator_t *allocator, void *ptr);
+```
+
+Allocate memory using the provided allocator.
+
+## Alignment Utilities
+
+```c
+size_t fq_align_up(size_t size, size_t alignment);
+```
+
+Round `size` up to the nearest multiple of `alignment` (must be a power of 2).
+
+```c
+fq_bool_t fq_is_aligned(const void *ptr, size_t alignment);
+```
+
+Check whether `ptr` is aligned to `alignment`.
+
+## Memory Statistics
+
+```c
+typedef struct fq_mem_stats_t {
+    size_t allocated_bytes;
+    size_t total_allocs;
+    size_t total_frees;
+    size_t peak_bytes;
+} fq_mem_stats_t;
+
+void fq_mem_stats(fq_mem_stats_t *stats);
+```
+
+Retrieve global memory allocation statistics.
+
+## Example
+
+```c
+fq_allocator_t alloc = {
+    .alloc   = my_alloc,
+    .realloc = my_realloc,
+    .free    = my_free,
+    .ctx     = my_ctx
+};
+
+fq_scheduler_config_t cfg;
+fq_scheduler_config_default(&cfg);
+cfg.allocator = &alloc;
+```
+
+---
+
+---
+url: /FastQueue/api/errors.md
+description: FastQueue error codes and error handling API reference.
+---
+
+# Errors API
+
+Error codes and error handling.
+
+## Types
+
+```c
+typedef enum fq_status_t {
+    FQ_OK            =  0,
+    FQ_ERR_NOMEM     = -1,
+    FQ_ERR_INVAL     = -2,
+    FQ_ERR_BUSY      = -3,
+    FQ_ERR_TIMEOUT   = -4,
+    FQ_ERR_CANCELED  = -5,
+    FQ_ERR_OVERFLOW  = -6,
+    FQ_ERR_CLOSED    = -7,
+    FQ_ERR_INTERNAL  = -8,
+    FQ_ERR_NOSUPPORT = -9
+} fq_status_t;
+```
+
+## Functions
+
+```c
+const char *fq_status_string(fq_status_t status);
+```
+
+Get human-readable error string for a status code.
+
+```c
+fq_bool_t fq_status_ok(fq_status_t status);
+```
+
+Check whether a status code indicates success (`FQ_TRUE` if `FQ_OK`).
+
+```c
+const char *fq_last_error(void);
+```
+
+Get the thread-local error message from the last failed operation. Returns an empty string if no error.
+
+```c
+void fq_set_error(const char *fmt, ...);
+```
+
+Set the thread-local error message with a printf-style format string.
+
+## Error Codes
+
+| Code | Name | Description |
+|---|---|---|
+| 0 | `FQ_OK` | Success |
+| -1 | `FQ_ERR_NOMEM` | Out of memory |
+| -2 | `FQ_ERR_INVAL` | Invalid argument |
+| -3 | `FQ_ERR_BUSY` | Resource busy / would block |
+| -4 | `FQ_ERR_TIMEOUT` | Operation timed out |
+| -5 | `FQ_ERR_CANCELED` | Operation was canceled |
+| -6 | `FQ_ERR_OVERFLOW` | Queue is full |
+| -7 | `FQ_ERR_CLOSED` | System has been shut down |
+| -8 | `FQ_ERR_INTERNAL` | Internal error |
+| -9 | `FQ_ERR_NOSUPPORT` | Operation not supported |
+
+## Example
+
+```c
+fq_status_t st = fq_thread_pool_create_ex(&pool, 4);
+if (!fq_status_ok(st)) {
+    fprintf(stderr, "Failed to create pool: %s (code=%d)\n",
+            fq_status_string(st), st);
+    return 1;
+}
+```
+
+---
+
+---
+url: /FastQueue/api/parallel.md
+description: >-
+  FastQueue parallel for-loop utility API reference for distributing iterations
+  across worker threads.
+---
+
+# Parallel For API
+
+Distributes a loop across worker threads for automatic data-parallel execution.
+
+## Types
+
+```c
+typedef void (*fq_parallel_for_fn)(long index, void *ctx);
+```
+
+Callback invoked for each iteration index.
+
+## Functions
+
+### Scheduler-based
+
+```c
+fq_status_t fq_scheduler_parallel_for(
+    fq_scheduler_t *scheduler,
+    long begin,
+    long end,
+    fq_parallel_for_fn fn,
+    void *ctx
+);
+```
+
+Execute a function over the range `[begin, end)` in parallel using the scheduler's worker threads. Blocks until all iterations complete.
+
+The range is split into chunks proportional to the number of workers.
+
+### Thread Pool-based
+
+```c
+fq_status_t fq_thread_pool_parallel_for(
+    fq_thread_pool_t *pool,
+    long begin,
+    long end,
+    fq_parallel_for_fn fn,
+    void *ctx
+);
+```
+
+Same as above but accepts a thread pool directly.
+
+## Example
+
+```c
+#include <fastqueue/fastqueue.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct {
+    double *data;
+    double  scalar;
+} scale_ctx_t;
+
+static void scale_element(long i, void *arg)
+{
+    scale_ctx_t *ctx = arg;
+    ctx->data[i] *= ctx->scalar;
+}
+
+int main(void)
+{
+    fq_thread_pool_t *pool = NULL;
+    fq_thread_pool_create(&pool);
+
+    const long N = 1000000;
+    double *arr = malloc(N * sizeof(double));
+    for (long i = 0; i < N; i++) arr[i] = (double)i;
+
+    scale_ctx_t ctx = { .data = arr, .scalar = 2.0 };
+    fq_thread_pool_parallel_for(pool, 0, N, scale_element, &ctx);
+
+    fq_thread_pool_shutdown(pool);
+    free(arr);
+    return 0;
+}
+```
+
+---
+
+---
+url: /FastQueue/api/time.md
+description: >-
+  FastQueue time utilities API reference for monotonic clocks and
+  high-resolution timers.
+---
+
+# Time API
+
+Cross-platform monotonic clock and high-resolution timer utilities.
+
+## Types
+
+```c
+typedef struct fq_timer_t {
+    int64_t start_ns;
+} fq_timer_t;
+```
+
+High-resolution timer for measuring elapsed time.
+
+## Functions
+
+### Clock
+
+```c
+int64_t fq_time_now_ns(void);
+```
+
+Returns the current monotonic time in nanoseconds. Suitable for measuring intervals and computing deltas.
+
+### Timer
+
+```c
+void fq_timer_start(fq_timer_t *timer);
+```
+
+Initialize a timer and record the current time.
+
+```c
+int64_t fq_timer_elapsed_ns(const fq_timer_t *timer);
+```
+
+Returns elapsed time in nanoseconds since `fq_timer_start` was called.
+
+```c
+int64_t fq_timer_elapsed_ms(const fq_timer_t *timer);
+```
+
+Returns elapsed time in milliseconds since `fq_timer_start` was called.
+
+## Example
+
+```c
+#include <fastqueue/fastqueue.h>
+#include <stdio.h>
+
+int main(void)
+{
+    fq_timer_t timer;
+    fq_timer_start(&timer);
+
+    /* Do some work */
+    for (volatile long i = 0; i < 100000000; i++) {}
+
+    int64_t elapsed_ns = fq_timer_elapsed_ns(&timer);
+    int64_t elapsed_ms = fq_timer_elapsed_ms(&timer);
+
+    printf("Elapsed: %lld ns (%lld ms)\n",
+           (long long)elapsed_ns, (long long)elapsed_ms);
+    return 0;
+}
+```
+
+---
+
+---
+url: /FastQueue/api/config.md
+description: FastQueue configuration constants and build options reference.
+---
+
+# Config API
+
+Build-time configuration constants.
+
+## Constants
+
+```c
+// Default thread count (auto-detect)
+FQ_DEFAULT_THREADS
+
+// Default log level
+FQ_DEFAULT_LOG_LEVEL
+
+// Queue defaults
+FQ_QUEUE_DEFAULT_CAPACITY
+FQ_QUEUE_MIN_CAPACITY
+FQ_QUEUE_MAX_CAPACITY
+
+// Thread limits
+FQ_MAX_THREADS
+
+// Future spin count before falling back to condition variable
+FQ_FUTURE_SPIN_COUNT
+
+// Cache-line size in bytes for padding
+FQ_CACHE_LINE_SIZE
+```
+
+## Log Levels
+
+```c
+typedef enum fq_log_level_t {
+    FQ_LOG_NONE   = 0,
+    FQ_LOG_ERROR  = 1,
+    FQ_LOG_WARN   = 2,
+    FQ_LOG_INFO   = 3,
+    FQ_LOG_DEBUG  = 4
+} fq_log_level_t;
+```
+
+## Log Callback
+
+```c
+typedef void (*fq_log_fn)(fq_log_level_t level, const char *message, void *ctx);
+```
+
+## Example
+
+```c
+void my_logger(fq_log_level_t level, const char *msg, void *ctx)
+{
+    printf("[%d] %s\n", level, msg);
+}
+
+fq_scheduler_config_t cfg;
+fq_scheduler_config_default(&cfg);
+cfg.log_callback = my_logger;
+cfg.log_level    = FQ_LOG_DEBUG;
+cfg.log_context  = NULL;
+```
+
+---
+
+---
+url: /FastQueue/api/version.md
+description: FastQueue version information and compatibility API reference.
+---
+
+# Version API
+
+Version information and compatibility checks.
+
+## Constants
+
+```c
+FQ_VERSION_MAJOR   // e.g. 0
+FQ_VERSION_MINOR   // e.g. 1
+FQ_VERSION_PATCH   // e.g. 0
+FQ_VERSION_STRING  // e.g. "0.1.0"
+FQ_VERSION_HEX    // e.g. 0x000100
+```
+
+## Functions
+
+```c
+const char *fq_version_string(void);
+```
+
+Get version string at runtime.
+
+```c
+int fq_version_hex(void);
+```
+
+Get version as hex integer (e.g. `0x000100` for 0.1.0).
+
+## Example
+
+```c
+#include <fastqueue/fastqueue.h>
+#include <stdio.h>
+
+int main(void)
+{
+    printf("FastQueue v%s\n", fq_version_string());
+    printf("Version hex: 0x%06x\n", fq_version_hex());
+    return 0;
+}
+```
