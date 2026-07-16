@@ -3,7 +3,7 @@
 # FastQueue
 
 <a href="https://muhammad-fiaz.github.io/FastQueue/"><img src="https://img.shields.io/badge/docs-muhammad--fiaz.github.io-blue" alt="Documentation"></a>
-<a href="https://github.com/muhammad-fiaz/FastQueue"><img src="https://img.shields.io/badge/C-C23-blue.svg?logo=c" alt="C Standard"></a>
+<a href="https://github.com/muhammad-fiaz/FastQueue"><img src="https://img.shields.io/badge/C-C99%20%7C%20C11%20%7C%20C17%20%7C%20C23-blue.svg?logo=c" alt="C Standard"></a>
 <a href="https://github.com/muhammad-fiaz/FastQueue"><img src="https://img.shields.io/github/stars/muhammad-fiaz/FastQueue" alt="GitHub stars"></a>
 <a href="https://github.com/muhammad-fiaz/FastQueue/issues"><img src="https://img.shields.io/github/issues/muhammad-fiaz/FastQueue" alt="GitHub issues"></a>
 <a href="https://github.com/muhammad-fiaz/FastQueue/pulls"><img src="https://img.shields.io/github/issues-pr/muhammad-fiaz/FastQueue" alt="GitHub pull requests"></a>
@@ -16,8 +16,7 @@
 <a href="https://github.com/sponsors/muhammad-fiaz"><img src="https://img.shields.io/badge/Sponsor-GitHub-pink?style=social&logo=github" alt="GitHub Sponsors"></a>
 <a href="https://hits.sh/github.com/muhammad-fiaz/FastQueue/"><img src="https://hits.sh/github.com/muhammad-fiaz/FastQueue.svg?label=Visitors&extraCount=0&color=green" alt="Repo Visitors"></a>
 
-<br>
-<p><em>A high-performance, production-ready job system and thread pool library for modern C23.</em></p>
+<p><em>A high-performance, production-ready C/C++ job system and thread pool library (C99 and later).</em></p>
 
 <b><a href="https://muhammad-fiaz.github.io/FastQueue/">Documentation</a> |
 <a href="https://muhammad-fiaz.github.io/FastQueue/api/overview">API Reference</a> |
@@ -26,13 +25,13 @@
 
 </div>
 
-`FastQueue` is a modern, high-performance C23 library providing work-stealing thread pools, MPMC task queues, futures, and custom allocator support for building high-performance concurrent applications.
+`FastQueue` is a modern, high-performance C/C++ library providing work-stealing thread pools, MPMC task queues, futures, and custom allocator support for building high-performance concurrent applications. Compatible with C99, C11, C17, C23, and C++.
 
 > [!TIP]
 > If you build with FastQueue, make sure to give it a star.
 
 > [!NOTE]
-> **Cross-platform:** FastQueue supports Linux (GCC, Clang), Windows (MSVC 2022+), and macOS (Clang) with zero external dependencies.
+> **Cross-platform:** FastQueue supports Linux (GCC, Clang), Windows (MSVC 2015+), and macOS (Clang) with zero external dependencies. C99 or later required, C++ fully supported.
 
 ---
 
@@ -49,7 +48,7 @@
 | **Time Utilities** | High-resolution timer and monotonic clock for performance measurement. | https://muhammad-fiaz.github.io/FastQueue/api/time |
 | **Custom Allocators** | Pluggable allocator interface for memory-constrained and embedded environments. | https://muhammad-fiaz.github.io/FastQueue/guide/memory |
 | **Cross-Platform** | Runs on Linux, Windows (MSVC), and macOS with no external dependencies. | https://muhammad-fiaz.github.io/FastQueue/guide/installation |
-| **C23 Modern C** | Written in ISO C23 with forward compatibility for C2Y/C26. | https://muhammad-fiaz.github.io/FastQueue/ |
+| **C99/C11/C17/C23** | Compatible with all modern C standards. C++ ready with `extern "C"` guards. | https://muhammad-fiaz.github.io/FastQueue/guide/installation |
 | **C++ Compatible** | All headers have `extern "C"` guards for direct use in C++ projects. | https://muhammad-fiaz.github.io/FastQueue/api/overview |
 | **Zero Dependencies** | Uses only the C standard library and platform APIs. | https://muhammad-fiaz.github.io/FastQueue/guide/installation |
 | **Work Stealing** | Idle workers automatically steal tasks from busy workers for optimal utilization. | https://muhammad-fiaz.github.io/FastQueue/guide/scheduler |

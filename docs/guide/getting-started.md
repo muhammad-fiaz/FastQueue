@@ -1,12 +1,12 @@
 ---
 title: Getting Started
-description: Learn how to install and set up FastQueue, a high-performance C23 thread pool and job system library.
-keywords: fastqueue, getting started, install, setup, c23, thread pool
+description: Learn how to install and set up FastQueue, a high-performance C/C++ thread pool and job system library.
+keywords: fastqueue, getting started, install, setup, c, c++, thread pool
 ---
 
 # Getting Started
 
-FastQueue is a production-ready, high-performance **Job System & Thread Pool Library** written in **ISO C23**.
+FastQueue is a production-ready, high-performance **Job System & Thread Pool Library** written in **C (C99 and later)** with full **C++ compatibility**.
 
 ## Features
 
@@ -20,7 +20,7 @@ FastQueue is a production-ready, high-performance **Job System & Thread Pool Lib
 
 ## Requirements
 
-- C23-capable compiler (GCC 14+, Clang 18+, MSVC 2022+)
+- C compiler with C99 or later support (GCC 4.8+, Clang 3.0+, MSVC 2015+)
 - CMake 3.20+
 - POSIX threads (Linux/macOS) or Win32 threads (Windows)
 

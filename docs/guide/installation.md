@@ -1,7 +1,7 @@
 ---
 title: Installation
-description: Detailed installation guide for FastQueue across all platforms and package managers.
-keywords: fastqueue install, cmake, xmake, conan, vcpkg, package manager
+description: Detailed installation guide for FastQueue C/C++ thread pool library across all platforms and package managers.
+keywords: fastqueue install, cmake, xmake, conan, vcpkg, package manager, c++, c
 ---
 
 # Installation
@@ -12,7 +12,7 @@ FastQueue supports multiple installation methods across all platforms.
 
 | Requirement | Minimum Version |
 |---|---|
-| C Compiler | C23 (GCC 14+, Clang 18+, MSVC 2022+) |
+| C Compiler | C99 or later (GCC 4.8+, Clang 3.0+, MSVC 2015+) |
 | CMake | 3.20+ |
 | pthreads | Linux/macOS only |
 | Win32 API | Windows only |

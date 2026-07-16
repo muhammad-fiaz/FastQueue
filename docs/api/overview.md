@@ -1,7 +1,7 @@
 ---
 title: API Overview
-description: Complete API reference for FastQueue C23 thread pool and job system library.
-keywords: api, reference, fastqueue api, c23 api
+description: Complete API reference for FastQueue C/C++ thread pool and job system library.
+keywords: api, reference, fastqueue api, c api, c++ api
 ---
 
 # API Overview

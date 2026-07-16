@@ -5,7 +5,7 @@ import llmstxt from "vitepress-plugin-llms";
 export const SITE_URL = "https://muhammad-fiaz.github.io/FastQueue";
 export const SITE_NAME = "FastQueue";
 export const SITE_DESCRIPTION =
-  "Production-ready, high-performance C23 job system and thread pool library with work-stealing scheduler, MPMC queues, futures, and custom allocators.";
+  "Production-ready, high-performance C/C++ job system and thread pool library with work-stealing scheduler, MPMC queues, futures, and custom allocators.";
 
 // Google Analytics and Google Tag Manager IDs
 export const GA_ID = "G-6BVYCRK57P";
@@ -16,7 +16,7 @@ export const ADSENSE_CLIENT_ID = "ca-pub-2040560600290490";
 
 // SEO Keywords
 export const KEYWORDS =
-  "c23, c, thread pool, job system, scheduler, concurrency, work stealing, mpmc queue, futures, parallel, async, performance, thread safe, custom allocator, cross-platform, lock free, task queue";
+  "c, c++, thread pool, job system, scheduler, concurrency, work stealing, mpmc queue, futures, parallel, async, performance, thread safe, custom allocator, cross-platform, lock free, task queue";
 
 export default defineConfig({
   lang: "en-US",
@@ -57,7 +57,7 @@ export default defineConfig({
       "meta",
       {
         property: "og:image:alt",
-        content: "FastQueue - High Performance C23 Thread Pool Library",
+        content: "FastQueue - High Performance C/C++ Thread Pool Library",
       },
     ],
     [
@@ -77,7 +77,7 @@ export default defineConfig({
       "meta",
       {
         name: "twitter:image:alt",
-        content: "FastQueue - High Performance C23 Thread Pool Library",
+        content: "FastQueue - High Performance C/C++ Thread Pool Library",
       },
     ],
     ["meta", { name: "twitter:site", content: "@muhammadfiaz_" }],
@@ -278,7 +278,7 @@ gtag('config', '${GA_ID}');`,
       Object.assign(primarySchema, {
         applicationCategory: "DeveloperApplication",
         operatingSystem: "Cross-platform (Linux, Windows, macOS)",
-        programmingLanguage: "C23",
+        programmingLanguage: "C/C++",
         offers: {
           "@type": "Offer",
           price: "0",

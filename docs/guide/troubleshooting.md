@@ -14,9 +14,9 @@ If you see volatile qualifier warnings, ensure you're using the latest FastQueue
 
 ### GCC/Clang: unknown type name '_Thread_local'
 
-Ensure you're compiling with C23 support:
+Ensure you're compiling with C11 or later support (recommended):
 ```bash
-gcc -std=c23 ...
+gcc -std=c11 ...
 ```
 
 ### CMake: Could not find package

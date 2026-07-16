@@ -1,13 +1,13 @@
 ---
 layout: home
-title: FastQueue - High Performance C23 Thread Pool Library
-description: Production-ready, high-performance C23 job system and thread pool library with work-stealing scheduler, MPMC queues, futures, and custom allocators.
-keywords: c23, thread pool, job system, scheduler, concurrency, work stealing, mpmc queue, futures, parallel, performance
+title: FastQueue - High Performance C/C++ Thread Pool Library
+description: Production-ready, high-performance C/C++ job system and thread pool library with work-stealing scheduler, MPMC queues, futures, and custom allocators.
+keywords: c, c++, thread pool, job system, scheduler, concurrency, work stealing, mpmc queue, futures, parallel, performance
 
 hero:
   name: FastQueue
   text: Production-Ready Job System & Thread Pool
-  tagline: High-performance, cross-platform C23 library for concurrent task execution with work-stealing, futures, and custom allocators.
+  tagline: High-performance, cross-platform C/C++ library for concurrent task execution with work-stealing, futures, and custom allocators.
   actions:
     - theme: brand
       text: Get Started
@@ -32,8 +32,8 @@ features:
     details: Pluggable allocator interface for memory-constrained and embedded environments.
   - title: Cross-Platform
     details: Runs on Linux, Windows (MSVC), and macOS with zero external dependencies. Standard library only.
-  - title: C23 Modern C
-    details: Written in ISO C23 with forward compatibility for C2Y/C26. C++ compatible with extern C guards.
+  - title: C99/C11/C17/C23 & C++
+    details: Compatible with C99 and later standards. Full C++ support with extern "C" guards.
   - title: Zero Dependencies
-    details: No external libraries required. Uses only the C standard library and platform APIs.
+    details: No external libraries required. Uses only the C/C++ standard library and platform APIs.
 ---

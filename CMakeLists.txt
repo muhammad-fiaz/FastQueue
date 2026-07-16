@@ -4,12 +4,16 @@ cmake_minimum_required(VERSION 3.20)
 
 project(FastQueue
     VERSION 0.1.0
-    DESCRIPTION "Production-ready, high-performance Job System & Thread Pool Library (C23)"
+    DESCRIPTION "Production-ready, high-performance Job System & Thread Pool Library (C99/C11/C17/C23)"
     HOMEPAGE_URL "https://github.com/muhammad-fiaz/FastQueue"
     LANGUAGES C
 )
 
-set(CMAKE_C_STANDARD 23)
+# Allow users to select their preferred C standard (default: C11)
+set(FQ_C_STANDARD "11" CACHE STRING "C standard to use (99, 11, 17, or 23)")
+set_property(CACHE FQ_C_STANDARD PROPERTY STRINGS "99" "11" "17" "23")
+
+set(CMAKE_C_STANDARD ${FQ_C_STANDARD})
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
@@ -128,7 +132,7 @@ target_include_directories(fastqueue
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
-target_compile_features(fastqueue PUBLIC c_std_23)
+target_compile_features(fastqueue PUBLIC c_std_11)
 
 # Platform-specific link dependencies.
 if(WIN32)

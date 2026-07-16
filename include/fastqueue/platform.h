@@ -21,14 +21,27 @@
  * @def FQ_C_VERSION
  * @brief Encoded C standard version as a single integer (major * 100 + minor).
  *
- * Defaults to 2300 (C23) when the compiler does not define `__STDC_VERSION__`.
+ * Detects C99 (9900), C11 (1100), C17 (1700), and C23 (2300).
+ * Defaults to C99 when the compiler does not define `__STDC_VERSION__`.
  */
 #if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L
 #    define FQ_C_VERSION 2300
 #elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201710L
 #    define FQ_C_VERSION 1700
+#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L
+#    define FQ_C_VERSION 1100
+#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+#    define FQ_C_VERSION 9900
 #else
-#    define FQ_C_VERSION 2300 /* assume C23 capable compiler */
+#    define FQ_C_VERSION 9900 /* assume C99 capable compiler */
+#endif
+
+/**
+ * @def FQ_C11_FEATURES
+ * @brief Defined when C11 features are available (C11 or later).
+ */
+#if FQ_C_VERSION >= 1100
+#    define FQ_C11_FEATURES 1
 #endif
 
 /**
@@ -261,9 +274,12 @@
  * @brief Alignment specifier.
  *
  * @a n must be a power of two.
+ * Uses C23 `alignas`, C11 `_Alignas`, or compiler-specific extensions.
  */
 #if defined(FQ_C23_FEATURES)
 #    define FQ_ALIGNAS(n) alignas(n)
+#elif defined(FQ_C11_FEATURES)
+#    define FQ_ALIGNAS(n) _Alignas(n)
 #elif defined(FQ_COMPILER_MSVC)
 #    define FQ_ALIGNAS(n) __declspec(align(n))
 #elif defined(FQ_COMPILER_GCC) || defined(FQ_COMPILER_CLANG)
@@ -275,16 +291,19 @@
 /**
  * @def FQ_STATIC_ASSERT
  * @brief Compile-time assertion.
+ * Uses C23 `static_assert`, C11 `_Static_assert`, or compiler extensions.
  */
 #if defined(FQ_C23_FEATURES)
 #    define FQ_STATIC_ASSERT(cond, msg) static_assert(cond, msg)
+#elif defined(FQ_C11_FEATURES)
+#    define FQ_STATIC_ASSERT(cond, msg) _Static_assert(cond, msg)
 #elif defined(FQ_COMPILER_MSVC)
 #    define FQ_STATIC_ASSERT(cond, msg) static_assert(cond, msg)
 #elif defined(FQ_COMPILER_GCC) || defined(FQ_COMPILER_CLANG)
 #    define FQ_STATIC_ASSERT(cond, msg) _Static_assert(cond, msg)
 #else
 #    define FQ_STATIC_ASSERT(cond, msg) \
-        typedef char fq_sa_##__LINE__[(cond) ? 1 : -1]
+         typedef char fq_sa_##__LINE__[(cond) ? 1 : -1]
 #endif
 
 /**

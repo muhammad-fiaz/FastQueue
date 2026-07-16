@@ -1,7 +1,7 @@
 {
   "name": "FastQueue",
   "short_name": "FastQueue",
-  "description": "Production-ready, high-performance C23 job system and thread pool library",
+  "description": "Production-ready, high-performance C/C++ job system and thread pool library",
   "start_url": "https://muhammad-fiaz.github.io/FastQueue/",
   "display": "standalone",
   "background_color": "#ffffff",

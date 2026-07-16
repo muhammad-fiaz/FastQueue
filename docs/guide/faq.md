@@ -1,7 +1,7 @@
 ---
 title: FAQ
-description: Frequently asked questions about FastQueue thread pool and job system library.
-keywords: faq, frequently asked questions, help, support
+description: Frequently asked questions about FastQueue C/C++ thread pool and job system library.
+keywords: faq, frequently asked questions, help, support, c, c++
 ---
 
 # Frequently Asked Questions
@@ -10,11 +10,11 @@ keywords: faq, frequently asked questions, help, support
 
 ### What is FastQueue?
 
-FastQueue is a production-ready, high-performance C23 job system and thread pool library. It provides work-stealing thread pools, MPMC queues, futures, and custom allocator support.
+FastQueue is a production-ready, high-performance C/C++ job system and thread pool library. It provides work-stealing thread pools, MPMC queues, futures, and custom allocator support.
 
 ### What language is it written in?
 
-FastQueue is written in ISO C23, making it compatible with C2Y/C26 and C++ compilers.
+FastQueue is written in C (C99 and later) with full C++ compatibility. All headers include `extern "C"` guards for seamless use in C++ projects.
 
 ### What platforms are supported?
 
@@ -72,9 +72,9 @@ CMake 3.20 or newer.
 
 ### Compiler requirements?
 
-- GCC 14+
-- Clang 18+
-- MSVC 2022+ (19.40+)
+- GCC 4.8+ (C99), GCC 11+ (recommended for full C11/C17 support)
+- Clang 3.0+ (C99), Clang 10+ (recommended)
+- MSVC 2015+ (C99), MSVC 2019+ (recommended)
 
 ### Can I build as shared library?
 
