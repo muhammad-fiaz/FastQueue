@@ -14,18 +14,32 @@ cmake-build-*/
 *.VC.db
 *.VC.opendb
 
-# Compiled files
+# Compiled files (C/C++)
 *.o
 *.obj
+*.obj.dSYM/
 *.lib
 *.a
 *.so
+*.so.*
 *.dylib
 *.dll
 *.exe
+*.out
 *.pdb
 *.ilk
 *.exp
+*.d
+*.gch
+*.pch
+
+# Debug files
+*.dSYM/
+*.su
+
+# VitePress
+docs/.vitepress/dist/
+docs/.vitepress/cache/
 
 # Package manager caches
 node_modules/
