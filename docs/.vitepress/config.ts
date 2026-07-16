@@ -229,21 +229,6 @@ gtag('config', '${GA_ID}');`,
     // Base Graph
     const graph: any[] = [];
 
-    // 1. WebSite Schema (Global, but usually best on Home)
-    if (isHome) {
-      graph.push({
-        "@type": "WebSite",
-        name: SITE_NAME,
-        url: SITE_URL,
-        description: SITE_DESCRIPTION,
-        author: {
-          "@type": "Person",
-          name: "Muhammad Fiaz",
-          url: "https://github.com/muhammad-fiaz",
-        },
-      });
-    }
-
     // 2. Main Entity Schema (SoftwareApplication or TechArticle)
     const authorSchema = {
       "@type": "Person",
@@ -256,6 +241,18 @@ gtag('config', '${GA_ID}');`,
       ],
     };
 
+    // 1. WebSite Schema (Global, but usually best on Home)
+    if (isHome) {
+      graph.push({
+        "@type": "WebSite",
+        name: SITE_NAME,
+        url: SITE_URL,
+        description: SITE_DESCRIPTION,
+        author: authorSchema,
+        publisher: authorSchema,
+      });
+    }
+
     const primarySchema: Record<string, any> = {
       "@type": isHome ? "SoftwareApplication" : "TechArticle",
       name: isHome ? SITE_NAME : pageTitle,
@@ -263,15 +260,7 @@ gtag('config', '${GA_ID}');`,
       url: canonicalUrl,
       image: `${SITE_URL}/cover.png`,
       author: authorSchema,
-      publisher: {
-        "@type": "Organization",
-        name: "FastQueue",
-        url: SITE_URL,
-        logo: {
-          "@type": "ImageObject",
-          url: `${SITE_URL}/logo.png`,
-        },
-      },
+      publisher: authorSchema,
     };
 
     if (isHome) {

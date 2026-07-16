@@ -263,10 +263,11 @@ fq_status_t fq_scheduler_shutdown(fq_scheduler_t *scheduler)
 
     fq_condition_broadcast(&scheduler->idle_cond);
 
-    for (unsigned i = 0; i < scheduler->worker_count; ++i) {
+    for (unsigned i = 0; i < scheduler->worker_count; ++i)
         fq_thread_join(&scheduler->workers[i].thread, NULL);
+
+    for (unsigned i = 0; i < scheduler->worker_count; ++i)
         fq_queue_destroy(scheduler->workers[i].queue);
-    }
 
     fq_free(scheduler->allocator, scheduler->workers);
     fq_condition_destroy(&scheduler->idle_cond);

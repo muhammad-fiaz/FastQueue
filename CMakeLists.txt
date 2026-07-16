@@ -9,13 +9,9 @@ project(FastQueue
     LANGUAGES C
 )
 
-# Allow users to select their preferred C standard (default: C11)
-set(FQ_C_STANDARD "11" CACHE STRING "C standard to use (99, 11, 17, or 23)")
+# Allow users to select their preferred C standard for library compilation (default: C11)
+set(FQ_C_STANDARD "11" CACHE STRING "C standard for library compilation (99, 11, 17, or 23)")
 set_property(CACHE FQ_C_STANDARD PROPERTY STRINGS "99" "11" "17" "23")
-
-set(CMAKE_C_STANDARD ${FQ_C_STANDARD})
-set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_C_EXTENSIONS OFF)
 
 # Use /Z7 debug format on MSVC to avoid PDB locking in parallel builds
 if(MSVC)
@@ -126,13 +122,21 @@ endif()
 
 add_library(FastQueue::fastqueue ALIAS fastqueue)
 
+# Compile library with selected C standard (PRIVATE - does not force consumers)
+set_target_properties(fastqueue PROPERTIES
+    C_STANDARD ${FQ_C_STANDARD}
+    C_STANDARD_REQUIRED ON
+    C_EXTENSIONS OFF
+)
+
 target_include_directories(fastqueue
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
-target_compile_features(fastqueue PUBLIC c_std_11)
+# Public headers require C99 minimum - consumers can use any C99+ standard
+target_compile_features(fastqueue PUBLIC c_std_99)
 
 # Platform-specific link dependencies.
 if(WIN32)
