@@ -24,6 +24,8 @@ FastQueue provides a layered API:
 | `fastqueue/version.h` | Version information |
 | `fastqueue/atomic.h` | Atomic operations |
 | `fastqueue/platform.h` | Platform abstraction |
+| `fastqueue/parallel.h` | Parallel for-loop utility |
+| `fastqueue/time.h` | Time and timer utilities |
 | `fastqueue/types.h` | Type definitions |
 
 ## Naming Conventions
@@ -77,4 +79,17 @@ fq_queue_create(&queue, capacity, allocator);
 fq_queue_push(queue, task);
 fq_queue_pop(queue, &task);
 fq_queue_destroy(queue);
+```
+
+### Parallel For
+```c
+fq_thread_pool_parallel_for(pool, 0, N, fn, ctx);
+fq_scheduler_parallel_for(scheduler, 0, N, fn, ctx);
+```
+
+### Time
+```c
+int64_t now = fq_time_now_ns();
+fq_timer_start(&timer);
+int64_t elapsed = fq_timer_elapsed_ns(&timer);
 ```
