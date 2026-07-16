@@ -1,5 +1,7 @@
 <div align="center">
 
+# FastQueue
+
 <a href="https://muhammad-fiaz.github.io/FastQueue/"><img src="https://img.shields.io/badge/docs-muhammad--fiaz.github.io-blue" alt="Documentation"></a>
 <a href="https://github.com/muhammad-fiaz/FastQueue"><img src="https://img.shields.io/badge/C-C23-blue.svg?logo=c" alt="C Standard"></a>
 <a href="https://github.com/muhammad-fiaz/FastQueue"><img src="https://img.shields.io/github/stars/muhammad-fiaz/FastQueue" alt="GitHub stars"></a>
@@ -12,9 +14,10 @@
 <a href="https://github.com/muhammad-fiaz/FastQueue/releases/latest"><img src="https://img.shields.io/github/v/release/muhammad-fiaz/FastQueue?label=Latest%20Release&style=flat-square" alt="Latest Release"></a>
 <a href="https://pay.muhammadfiaz.com"><img src="https://img.shields.io/badge/Sponsor-pay.muhammadfiaz.com-ff69b4?style=flat&logo=heart" alt="Sponsor"></a>
 <a href="https://github.com/sponsors/muhammad-fiaz"><img src="https://img.shields.io/badge/Sponsor-GitHub-pink?style=social&logo=github" alt="GitHub Sponsors"></a>
-<a href="https://hits.sh/muhammad-fiaz/FastQueue/"><img src="https://hits.sh/muhammad-fiaz/FastQueue.svg?label=Visitors&extraCount=0&color=green" alt="Repo Visitors"></a>
+<a href="https://hits.sh/github.com/muhammad-fiaz/FastQueue/"><img src="https://hits.sh/github.com/muhammad-fiaz/FastQueue.svg?label=Visitors&extraCount=0&color=green" alt="Repo Visitors"></a>
 
-<p><em>Production-ready, high-performance Job System & Thread Pool Library in ISO C23.</em></p>
+<br>
+<p><em>A high-performance, production-ready job system and thread pool library for modern C23.</em></p>
 
 <b><a href="https://muhammad-fiaz.github.io/FastQueue/">Documentation</a> |
 <a href="https://muhammad-fiaz.github.io/FastQueue/api/overview">API Reference</a> |
