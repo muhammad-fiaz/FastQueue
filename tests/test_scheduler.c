@@ -323,8 +323,8 @@ int test_scheduler_stats_timing(void)
     fq_scheduler_stats_t stats;
     fq_scheduler_stats(s, &stats);
 
-    /* Work time should be >= 0 (timing granularity varies by platform). */
-    if (stats.total_work_ns < 0) {
+    /* Verify stats are populated (timing granularity varies by platform). */
+    if (stats.tasks_completed < 1000) {
         fq_scheduler_shutdown(s);
         fq_mutex_destroy(&g_mutex);
         return 1;
