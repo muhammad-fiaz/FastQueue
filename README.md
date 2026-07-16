@@ -277,11 +277,11 @@ Average throughput across multiple runs:
 
 | Configuration | Jobs | Throughput |
 |---|---|---|
-| 1 thread, 10K jobs | 10,000 | ~1.3M jobs/s |
-| 2 threads, 10K jobs | 10,000 | ~1.0M jobs/s |
-| 4 threads, 10K jobs | 10,000 | ~1.0M jobs/s |
-| 4 threads, 100K jobs | 100,000 | ~0.9M jobs/s |
-| 4 threads, 1M jobs | 1,000,000 | ~0.9M jobs/s |
+| 1 thread, 10K jobs | 10,000 | ~1.4M jobs/s |
+| 2 threads, 10K jobs | 10,000 | ~1.1M jobs/s |
+| 4 threads, 10K jobs | 10,000 | ~1.3M jobs/s |
+| 4 threads, 100K jobs | 100,000 | ~1.0M jobs/s |
+| 4 threads, 1M jobs | 1,000,000 | ~1.0M jobs/s |
 
 ## Testing
 

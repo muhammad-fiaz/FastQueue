@@ -84,9 +84,12 @@ static int worker_main(void *arg)
     snprintf(buf, sizeof(buf), "worker %u started", w->id);
     log_msg(s, FQ_LOG_DEBUG, buf);
 
-    while (fq_atomic_load_explicit(&s->shutdown_flag, FQ_MEMORY_ORDER_ACQUIRE) == 0 ||
-           fq_queue_size(s->global_queue) > 0 ||
-           fq_queue_size(w->queue) > 0) {
+    unsigned idle_backoff = 0;
+
+    for (;;) {
+        if (fq_atomic_load_explicit(&s->shutdown_flag, FQ_MEMORY_ORDER_ACQUIRE) != 0 &&
+            fq_queue_empty(s->global_queue) && fq_queue_empty(w->queue))
+            break;
 
         fq_task_t *task = NULL;
         fq_bool_t found = FQ_FALSE;
@@ -100,6 +103,7 @@ static int worker_main(void *arg)
         }
 
         if (found && task) {
+            idle_backoff = 0;
             fq_atomic_fetch_add_explicit(&s->tasks_active, 1,
                                          FQ_MEMORY_ORDER_RELEASE);
             fq_atomic_fetch_sub_explicit(&s->tasks_pending, 1,
@@ -119,7 +123,10 @@ static int worker_main(void *arg)
 
             fq_mutex_lock(&s->submit_mutex);
             if (fq_queue_empty(s->global_queue) && fq_queue_empty(w->queue)) {
-                fq_condition_timedwait(&s->idle_cond, &s->submit_mutex, 1);
+                unsigned timeout = 1u << (idle_backoff < 4 ? idle_backoff : 4);
+                if (timeout > 16) timeout = 16;
+                fq_condition_timedwait(&s->idle_cond, &s->submit_mutex, timeout);
+                if (idle_backoff < 6) idle_backoff++;
             }
             fq_mutex_unlock(&s->submit_mutex);
 

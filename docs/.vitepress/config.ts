@@ -364,6 +364,7 @@ gtag('config', '${GA_ID}');`,
       { text: "Home", link: "/" },
       { text: "Guide", link: "/guide/getting-started" },
       { text: "API", link: "/api/overview" },
+      { text: "Examples", link: "/examples/" },
       {
         text: "Support",
         items: [
@@ -456,6 +457,28 @@ gtag('config', '${GA_ID}');`,
         dateStyle: "medium",
         timeStyle: "short",
       },
+    },
+
+    outline: {
+      level: [2, 3],
+      label: "On this page",
+    },
+
+    docFooter: {
+      prev: "Previous",
+      next: "Next",
+    },
+
+    returnToTopLabel: "Back to top",
+    sidebarMenuLabel: "Menu",
+    darkModeSwitchLabel: "Appearance",
+    lightModeSwitchTitle: "Switch to light mode",
+    darkModeSwitchTitle: "Switch to dark mode",
+    skipToContentLabel: "Skip to content",
+
+    carbonAds: {
+      code: "",
+      placement: "",
     },
   },
 });

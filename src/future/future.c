@@ -76,11 +76,14 @@ fq_status_t fq_future_wait(fq_future_t *future)
 {
     if (!future) return FQ_ERR_INVAL;
 
-    /* Spin phase. */
+    /* Adaptive spin: start with tight spins, then back off. */
     for (unsigned i = 0; i < FQ_FUTURE_SPIN_COUNT; ++i) {
         if (fq_atomic_load_explicit(&future->ready, FQ_MEMORY_ORDER_ACQUIRE))
             return future->status;
-        fq_thread_yield();
+        if (i < FQ_FUTURE_SPIN_COUNT / 2)
+            fq_thread_yield();
+        else
+            fq_thread_sleep_ms(0);
     }
 
     /* Wait phase. */

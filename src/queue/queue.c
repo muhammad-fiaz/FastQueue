@@ -119,7 +119,9 @@ fq_status_t fq_queue_pop(fq_queue_t *queue, fq_task_t **task)
 {
     if (!queue || !task) return FQ_ERR_INVAL;
 
-    fq_mutex_lock(&queue->pop_lock);
+    if (fq_mutex_trylock(&queue->pop_lock) != 0) {
+        fq_mutex_lock(&queue->pop_lock);
+    }
 
     int head = fq_atomic_load_explicit(&queue->head, FQ_MEMORY_ORDER_RELAXED);
     int tail = fq_atomic_load_explicit(&queue->tail, FQ_MEMORY_ORDER_ACQUIRE);
