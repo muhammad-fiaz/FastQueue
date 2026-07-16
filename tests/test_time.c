@@ -10,12 +10,14 @@
 int test_time_now_ns(void)
 {
     int64_t t1 = fq_time_now_ns();
-    if (t1 <= 0) return 1;
 
-    fq_thread_sleep_ms(10);
+    fq_thread_sleep_ms(50);
 
     int64_t t2 = fq_time_now_ns();
-    if (t2 <= t1) return 2;
+
+    /* Verify time advanced by at least 40ms. */
+    int64_t diff_ms = (t2 - t1) / 1000000;
+    if (diff_ms < 40) return 1;
 
     return 0;
 }
