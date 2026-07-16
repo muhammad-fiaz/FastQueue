@@ -155,10 +155,12 @@ int main()
 | Code | Name | Meaning |
 |---|---|---|
 | 0 | `FQ_OK` | Success |
-| -1 | `FQ_ERR_INVAL` | Invalid argument |
-| -2 | `FQ_ERR_NOMEM` | Out of memory |
+| -1 | `FQ_ERR_NOMEM` | Out of memory |
+| -2 | `FQ_ERR_INVAL` | Invalid argument |
 | -3 | `FQ_ERR_BUSY` | Resource busy |
-| -4 | `FQ_ERR_OVERFLOW` | Queue overflow |
-| -5 | `FQ_ERR_CLOSED` | Resource closed |
-| -6 | `FQ_ERR_TIMEOUT` | Operation timed out |
-| -7 | `FQ_ERR_INTERNAL` | Internal error |
+| -4 | `FQ_ERR_TIMEOUT` | Operation timed out |
+| -5 | `FQ_ERR_CANCELED` | Operation was canceled |
+| -6 | `FQ_ERR_OVERFLOW` | Queue overflow |
+| -7 | `FQ_ERR_CLOSED` | Resource closed |
+| -8 | `FQ_ERR_INTERNAL` | Internal error |
+| -9 | `FQ_ERR_NOSUPPORT` | Not supported |

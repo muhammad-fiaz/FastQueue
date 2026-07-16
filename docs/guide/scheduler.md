@@ -109,10 +109,14 @@ void fq_scheduler_stats(const fq_scheduler_t *scheduler, fq_scheduler_stats_t *s
 ```
 
 The `fq_scheduler_stats_t` struct contains:
+- `thread_count` - Number of worker threads
 - `tasks_submitted` - Total tasks submitted
 - `tasks_completed` - Total tasks completed
 - `tasks_canceled` - Total tasks canceled
-- `thread_count` - Number of worker threads
+- `tasks_pending` - Currently pending tasks
+- `tasks_active` - Currently executing tasks
+- `total_wait_ns` - Cumulative wait time in nanoseconds
+- `total_work_ns` - Cumulative work time in nanoseconds
 
 ## Work Stealing
 

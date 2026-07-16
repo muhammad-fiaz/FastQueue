@@ -10,15 +10,15 @@ FastQueue is designed for high-throughput, low-latency task execution.
 
 ## Benchmark Results
 
-Measured on a modern x86-64 system:
+Average throughput across multiple runs:
 
-| Configuration | Jobs | Time | Throughput |
-|---|---|---|---|
-| 1 thread, 10K jobs | 10,000 | 9.3 ms | ~1.07M jobs/s |
-| 2 threads, 10K jobs | 10,000 | 7.4 ms | ~1.35M jobs/s |
-| 4 threads, 10K jobs | 10,000 | 5.0 ms | ~2.00M jobs/s |
-| 4 threads, 100K jobs | 100,000 | 65.4 ms | ~1.53M jobs/s |
-| 4 threads, 1M jobs | 1,000,000 | 677.7 ms | ~1.48M jobs/s |
+| Configuration | Jobs | Throughput |
+|---|---|---|
+| 1 thread, 10K jobs | 10,000 | ~1.3M jobs/s |
+| 2 threads, 10K jobs | 10,000 | ~1.0M jobs/s |
+| 4 threads, 10K jobs | 10,000 | ~1.0M jobs/s |
+| 4 threads, 100K jobs | 100,000 | ~0.9M jobs/s |
+| 4 threads, 1M jobs | 1,000,000 | ~0.9M jobs/s |
 
 ## Running Benchmarks
 

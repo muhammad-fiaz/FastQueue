@@ -58,8 +58,8 @@ void fq_future_destroy(fq_future_t *future);
 ### Waiting
 
 ```c
-void fq_future_wait(fq_future_t *future);
-fq_status_t fq_future_wait_timeout(fq_future_t *future, unsigned timeout_ms);
+fq_status_t fq_future_wait(fq_future_t *future);
+fq_status_t fq_future_wait_timeout(fq_future_t *future, unsigned timeout_ms, fq_status_t *status);
 fq_bool_t fq_future_is_ready(const fq_future_t *future);
 ```
 
@@ -117,7 +117,7 @@ fq_task_t *task = NULL;
 fq_task_create(&task, slow_task, NULL, NULL);
 fq_scheduler_submit_with_future(scheduler, task, &future);
 
-fq_status_t st = fq_future_wait_timeout(future, 5000); // 5 second timeout
+fq_status_t st = fq_future_wait_timeout(future, 5000, NULL); // 5 second timeout
 if (st == FQ_OK) {
     printf("Task completed\n");
 } else {

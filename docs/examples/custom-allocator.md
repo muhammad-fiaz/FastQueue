@@ -103,13 +103,19 @@ static void arena_free(void *ptr, void *ctx)
     (void)ptr; (void)ctx;
 }
 
+static void *arena_realloc(void *ptr, size_t new_size, void *ctx)
+{
+    (void)ptr; (void)ctx;
+    return NULL;
+}
+
 int main(void)
 {
     static arena_t arena = {0};
 
     fq_allocator_t alloc = {
         .alloc   = arena_alloc,
-        .realloc = NULL,
+        .realloc = arena_realloc,
         .free    = arena_free,
         .ctx     = &arena
     };
